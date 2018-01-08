@@ -1,0 +1,20 @@
+########################
+#Unreal Generated Files#
+########################
+
+*/Build
+*/Binaries
+*/DerivedDataCache
+*/Intermediate
+*/Saved
+OperationIndigo/Content/StarterContent/Textures
+OperationIndigo/Content/StarterContent/HDRI
+
+########################
+#Visual Generated Files#
+########################
+
+*.VC.db
+*.suo
+*.VC.opendb
+*.sln
