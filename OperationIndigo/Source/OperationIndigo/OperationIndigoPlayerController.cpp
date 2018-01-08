@@ -4,12 +4,21 @@
 #include "AI/Navigation/NavigationSystem.h"
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
+#include "TacticalCamera.h"
 #include "OperationIndigoCharacter.h"
+#include "Tile.h"
+#include "Kismet/GameplayStatics.h"
 
 AOperationIndigoPlayerController::AOperationIndigoPlayerController()
 {
 	bShowMouseCursor = true;
-	DefaultMouseCursor = EMouseCursor::Crosshairs;
+}
+
+
+
+void AOperationIndigoPlayerController::BeginPlay()
+{
+
 }
 
 void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
@@ -19,7 +28,7 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 	// keep updating the destination every tick while desired
 	if (bMoveToMouseCursor)
 	{
-		MoveToMouseCursor();
+		//MoveToMouseCursor();
 	}
 }
 
@@ -28,85 +37,95 @@ void AOperationIndigoPlayerController::SetupInputComponent()
 	// set up gameplay key bindings
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction("SetDestination", IE_Pressed, this, &AOperationIndigoPlayerController::OnSetDestinationPressed);
-	InputComponent->BindAction("SetDestination", IE_Released, this, &AOperationIndigoPlayerController::OnSetDestinationReleased);
+	InputComponent->BindAction("LeftMouseButton", IE_Pressed, this, &AOperationIndigoPlayerController::SelectionPressed);
 
-	// support touch devices 
-	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AOperationIndigoPlayerController::MoveToTouchLocation);
-	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AOperationIndigoPlayerController::MoveToTouchLocation);
-
-	InputComponent->BindAction("ResetVR", IE_Pressed, this, &AOperationIndigoPlayerController::OnResetVR);
+	//InputComponent->BindAction("RightMouseButton", IE_Released, this, &AUntitledNamedPlayerController::MoveReleased);
+	InputComponent->BindAction("RotateCamera", IE_Pressed, this, &AOperationIndigoPlayerController::RotateCamera);
+	InputComponent->BindAction("RotateCamera", IE_Released, this, &AOperationIndigoPlayerController::BranchReleased);
 }
 
-void AOperationIndigoPlayerController::OnResetVR()
+void AOperationIndigoPlayerController::SelectionPressed()
 {
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
-
-void AOperationIndigoPlayerController::MoveToMouseCursor()
-{
-	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
+	if (bBattlePhase)
 	{
-		if (AOperationIndigoCharacter* MyPawn = Cast<AOperationIndigoCharacter>(GetPawn()))
-		{
-			if (MyPawn->GetCursorToWorld())
-			{
-				UNavigationSystem::SimpleMoveToLocation(this, MyPawn->GetCursorToWorld()->GetComponentLocation());
-			}
-		}
+
 	}
 	else
 	{
-		// Trace to see what is under the mouse cursor
+		UE_LOG(LogTemp, Warning, TEXT("false"))
+	}
+}  
+
+void AOperationIndigoPlayerController::SelectCharacter(AOperationIndigoCharacter * SelectCharacterToSet)
+{
+	UE_LOG(LogTemp, Warning, TEXT("false"))
+	InitSelection();
+	SelectedCharacter = SelectCharacterToSet;
+	SelectedCharacter->SetSelected();
+}
+
+void AOperationIndigoPlayerController::InitSelection()
+{
+	if (SelectedCharacter)
+	{
+		SelectedCharacter->SetDeSelected();
+		SelectedCharacter = nullptr;
+	}
+}
+
+void AOperationIndigoPlayerController::MoveToTile()
+{
+	if (SelectedCharacter->bActivatedTurn)
+	{
 		FHitResult Hit;
-		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-
-		if (Hit.bBlockingHit)
+		GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
+		if (Hit.Actor != NULL)
 		{
-			// We hit something, move there
-			SetNewMoveDestination(Hit.ImpactPoint);
+			auto DestinationTile = Cast<ATile>(Hit.GetActor());
+			if (DestinationTile)
+			{
+				SelectedCharacter->MoveToTile(DestinationTile->GetActorLocation());
+			}
 		}
 	}
 }
 
-void AOperationIndigoPlayerController::MoveToTouchLocation(const ETouchIndex::Type FingerIndex, const FVector Location)
+void AOperationIndigoPlayerController::RotateCamera()
 {
-	FVector2D ScreenSpaceLocation(Location);
-
-	// Trace to see what is under the touch location
-	FHitResult HitResult;
-	GetHitResultAtScreenPosition(ScreenSpaceLocation, CurrentClickTraceChannel, true, HitResult);
-	if (HitResult.bBlockingHit)
+	if (!SelectedCharacter)
 	{
-		// We hit something, move there
-		SetNewMoveDestination(HitResult.ImpactPoint);
+		// flag to set mouse event
+		bRotatedCamera = true;
+		bEnableClickEvents = false;
+		bShowMouseCursor = false;
+		bEnableMouseOverEvents = false;
+
+		auto CameraPawn = Cast<ATacticalCamera>(GetPawn());
+		CameraPawn->RotateCamera();
+	}
+	//if character is selected, then actiavate MoveToTile
+	else if (SelectedCharacter)
+	{
+		MoveToTile();
 	}
 }
 
-void AOperationIndigoPlayerController::SetNewMoveDestination(const FVector DestLocation)
+void AOperationIndigoPlayerController::BranchReleased()
 {
-	APawn* const MyPawn = GetPawn();
-	if (MyPawn)
+	if (bRotatedCamera)
 	{
-		UNavigationSystem* const NavSys = GetWorld()->GetNavigationSystem();
-		float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
+		// return flag for mouse event
+		bEnableClickEvents = true;
+		bRotatedCamera = false;
+		bShowMouseCursor = true;
+		bEnableMouseOverEvents = true;
 
-		// We need to issue move command only if far enough in order for walk animation to play correctly
-		if (NavSys && (Distance > 120.0f))
-		{
-			NavSys->SimpleMoveToLocation(this, DestLocation);
-		}
+		// Deactivate Rotate Camera
+		auto CameraPawn = Cast<ATacticalCamera>(GetPawn());
+		CameraPawn->RotateReleased();
 	}
-}
+	else if (SelectedCharacter)
+	{
 
-void AOperationIndigoPlayerController::OnSetDestinationPressed()
-{
-	// set flag to keep updating destination until released
-	bMoveToMouseCursor = true;
-}
-
-void AOperationIndigoPlayerController::OnSetDestinationReleased()
-{
-	// clear flag to indicate we should stop updating the destination
-	bMoveToMouseCursor = false;
+	}
 }

@@ -11,30 +11,33 @@ class AOperationIndigoCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
+	float HearBarPer = 1.f;
+
 public:
+	bool bActivatedTurn = true;
+
+	UPROPERTY(EditAnywhere, Category = "SetUp")
+		int32 Priority;
+
 	AOperationIndigoCharacter();
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 
-	/** Returns TopDownCameraComponent subobject **/
-	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns CursorToWorld subobject **/
-	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
+	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
+		void SetSelected();
 
-private:
-	/** Top down camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* TopDownCameraComponent;
+	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
+		void SetDeSelected();
 
-	/** Camera boom positioning the camera above the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	float GetSpeed() const;
 
-	/** A decal that projects to the cursor location. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UDecalComponent* CursorToWorld;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
+		bool bSelected = false;
+
+	void MoveToTile(FVector Location);
+
+	void InitTurn();
 };
 
