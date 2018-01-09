@@ -58,7 +58,6 @@ void AOperationIndigoPlayerController::SelectionPressed()
 
 void AOperationIndigoPlayerController::SelectCharacter(AOperationIndigoCharacter * SelectCharacterToSet)
 {
-	UE_LOG(LogTemp, Warning, TEXT("false"))
 	InitSelection();
 	SelectedCharacter = SelectCharacterToSet;
 	SelectedCharacter->SetSelected();
@@ -75,6 +74,7 @@ void AOperationIndigoPlayerController::InitSelection()
 
 void AOperationIndigoPlayerController::MoveToTile()
 {
+	
 	if (SelectedCharacter->bActivatedTurn)
 	{
 		FHitResult Hit;

@@ -26,15 +26,15 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
-		void SetSelected();
+	void SetSelected();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
-		void SetDeSelected();
+	void SetDeSelected();
 
 	float GetSpeed() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
-		bool bSelected = false;
+	bool bSelected = false;
 
 	void MoveToTile(FVector Location);
 
