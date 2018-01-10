@@ -11,19 +11,28 @@ class AOperationIndigoCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
-	float HearBarPer = 1.f;
+protected:
+	// Gague Rise Per Seconds
+	float ActionGaugePer = 10.f;
 
-public:
-	bool bActivatedTurn = true;
-
-	UPROPERTY(EditAnywhere, Category = "SetUp")
-		int32 Priority;
-
-	AOperationIndigoCharacter();
+	// Gauge to activate turn
+	float ActionGauge = 0.f;
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
+public:
+	// it allows character to do action
+	bool bActivatedTurn = false;
+	
+	// it control Gauge
+	bool bCanRunGauge = true;
+
+	const float GetGauge();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
+	bool bSelected = false;
+
+	AOperationIndigoCharacter();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
 	void SetSelected();
@@ -31,13 +40,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
 	void SetDeSelected();
 
-	float GetSpeed() const;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
-	bool bSelected = false;
-
+	// Move character to Tile
 	void MoveToTile(FVector Location);
-
+	// initialize the Deactivate Turn State
 	void InitTurn();
+	
+	// It called by OIController.
+	void RiseGauge();
 };
 

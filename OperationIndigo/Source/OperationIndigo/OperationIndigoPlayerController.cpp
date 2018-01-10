@@ -3,6 +3,7 @@
 #include "OperationIndigoPlayerController.h"
 #include "AI/Navigation/NavigationSystem.h"
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
+#include "EngineUtils.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "TacticalCamera.h"
 #include "OperationIndigoCharacter.h"
@@ -18,17 +19,49 @@ AOperationIndigoPlayerController::AOperationIndigoPlayerController()
 
 void AOperationIndigoPlayerController::BeginPlay()
 {
-
+	ActivateBattlePhase();
 }
 
 void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
-	// keep updating the destination every tick while desired
-	if (bMoveToMouseCursor)
+	if (bBattlePhase)
 	{
-		//MoveToMouseCursor();
+		for (auto Unit : UnitsInBattlePhase)
+		{
+			if (!bStopGauge)
+			{
+				if (Unit->GetGauge() < 100)
+				{
+					Unit->RiseGauge();
+				}
+				else
+				{
+					Unit->bActivatedTurn = true;
+				}
+			}
+			UE_LOG(LogTemp, Warning, TEXT("%s Gauge Ouput: %lf"), *Unit->GetName(), Unit->GetGauge())
+		}
+		
+		for (auto Unit : UnitsInBattlePhase)
+		{
+			if (Unit->bActivatedTurn)
+			{
+				Count++;
+			}
+		}
+
+		if (Count != 0)
+		{
+			bStopGauge = true;
+		}
+		else
+		{
+			bStopGauge = false;
+		}
+
+		Count = 0;
 	}
 }
 
@@ -124,8 +157,19 @@ void AOperationIndigoPlayerController::BranchReleased()
 		auto CameraPawn = Cast<ATacticalCamera>(GetPawn());
 		CameraPawn->RotateReleased();
 	}
-	else if (SelectedCharacter)
-	{
+}
 
+void AOperationIndigoPlayerController::ActivateBattlePhase()
+{
+	for (TActorIterator<AOperationIndigoCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		// Same as with the Object Iterator, access the subclass instance with the * or -> operators.
+		AOperationIndigoCharacter *FindCharacter = *ActorItr;
+		UnitsInBattlePhase.Add(FindCharacter);
 	}
+}
+
+void AOperationIndigoPlayerController::DeActivateBattlePhase()
+{
+	UnitsInBattlePhase.Empty();
 }

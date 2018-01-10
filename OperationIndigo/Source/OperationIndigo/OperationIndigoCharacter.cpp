@@ -12,6 +12,8 @@
 #include "Materials/Material.h"
 #include "PlayerAIController.h"
 
+const float AOperationIndigoCharacter::GetGauge(){ return ActionGauge;}
+
 AOperationIndigoCharacter::AOperationIndigoCharacter()
 {
 	// Set size for player capsule
@@ -36,38 +38,6 @@ AOperationIndigoCharacter::AOperationIndigoCharacter()
 void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-
-	/*if (CursorToWorld != nullptr)
-	{
-		if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
-		{
-			if (UWorld* World = GetWorld())
-			{
-				FHitResult HitResult;
-				FCollisionQueryParams Params(NAME_None, FCollisionQueryParams::GetUnknownStatId());
-				FVector StartLocation = TopDownCameraComponent->GetComponentLocation();
-				FVector EndLocation = TopDownCameraComponent->GetComponentRotation().Vector() * 2000.0f;
-				Params.AddIgnoredActor(this);
-				World->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
-				FQuat SurfaceRotation = HitResult.ImpactNormal.ToOrientationRotator().Quaternion();
-				CursorToWorld->SetWorldLocationAndRotation(HitResult.Location, SurfaceRotation);
-			}
-		}
-		else if (APlayerController* PC = Cast<APlayerController>(GetController()))
-		{
-			FHitResult TraceHitResult;
-			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
-			FVector CursorFV = TraceHitResult.ImpactNormal;
-			FRotator CursorR = CursorFV.Rotation();
-			CursorToWorld->SetWorldLocation(TraceHitResult.Location);
-			CursorToWorld->SetWorldRotation(CursorR);
-		}
-	}*/
-}
-
-float AOperationIndigoCharacter::GetSpeed() const
-{
-	return GetCharacterMovement()->GetMaxSpeed();
 }
 
 void AOperationIndigoCharacter::MoveToTile(FVector Location)
@@ -77,9 +47,10 @@ void AOperationIndigoCharacter::MoveToTile(FVector Location)
 		auto Controller = Cast<APlayerAIController>(GetController());
 		if (Controller)
 		{
-			auto MoveToLocation = FMath::VInterpTo(this->GetActorLocation(), Location, GetWorld()->GetTimeSeconds(), GetSpeed());
+			auto MoveToLocation = FMath::VInterpTo(this->GetActorLocation(), Location, GetWorld()->GetTimeSeconds(), GetCharacterMovement()->GetMaxSpeed());
 			Controller->MoveToLocation(MoveToLocation, 0.f);
 			bActivatedTurn = false;
+			ActionGauge = 0.f;
 		}
 	}
 }
@@ -87,4 +58,9 @@ void AOperationIndigoCharacter::MoveToTile(FVector Location)
 void AOperationIndigoCharacter::InitTurn()
 {
 	bActivatedTurn = true;
+}
+
+void AOperationIndigoCharacter::RiseGauge()
+{
+	ActionGauge += ActionGaugePer*GetWorld()->GetDeltaSeconds();
 }

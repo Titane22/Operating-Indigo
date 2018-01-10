@@ -37,13 +37,13 @@ protected:
 	// End PlayerController interface
 	
 	UFUNCTION(BlueprintCallable, Category = "Select")
-		void SelectionPressed();
+	void SelectionPressed();
 
 	void RotateCamera();
 
 	void BranchReleased();
 
-	//TArray<AUntitledNamedCharacter*> SelectedUnits; // TODO : if bBattlePhase is false, then add to all character
+	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add to all character
 
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	AOperationIndigoCharacter* SelectedCharacter = nullptr;
@@ -53,8 +53,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SetUp")
 	bool bBattlePhase = true;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Select")
-	//bool bSelectedCharacter = false;
+	void ActivateBattlePhase();
+
+	void DeActivateBattlePhase();
+
+	int32 Count = 0;
+
+	bool bStopGauge = false;
 };
 
 
