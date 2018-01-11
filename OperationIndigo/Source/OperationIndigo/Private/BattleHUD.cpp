@@ -2,6 +2,7 @@
 
 #include "BattleHUD.h"
 
+void ABattleHUD::DrawHUD()
+{
 
-
-
+}

@@ -6,7 +6,10 @@
 #include "EngineUtils.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "TacticalCamera.h"
+#include "PlayerAIController.h"
+#include "EnemyAIController.h"
 #include "OperationIndigoCharacter.h"
+#include "BattleHUD.h"
 #include "Tile.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -30,29 +33,43 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 	{
 		for (auto Unit : UnitsInBattlePhase)
 		{
+			// Stop when anyone is true.
 			if (!bStopGauge)
 			{
-				if (Unit->GetGauge() < 100)
+				if (Unit->GetGauge() < ActionBarGauge)
 				{
 					Unit->RiseGauge();
 				}
 				else
 				{
-					Unit->bActivatedTurn = true;
+					Unit->ActivatedTurn();
 				}
 			}
-			UE_LOG(LogTemp, Warning, TEXT("%s Gauge Ouput: %lf"), *Unit->GetName(), Unit->GetGauge())
+			else
+			{
+				// 
+				if (Unit->isActivated() && !bMovedToCharacter)
+				{
+					Unit->SetSelected();
+					auto PlayerCamera = GetPawn();
+					auto MoveToLocation = Unit->GetActorLocation();
+					MoveToLocation.Z = PlayerCamera->GetActorLocation().Z;
+					PlayerCamera->SetActorLocation(MoveToLocation);
+				}
+			}
+			//UE_LOG(LogTemp, Warning, TEXT("%s Gauge Ouput: %lf"), *Unit->GetName(), Unit->GetGauge())
 		}
-		
+		// It check how many activated
 		for (auto Unit : UnitsInBattlePhase)
 		{
-			if (Unit->bActivatedTurn)
+			if (Unit->isActivated())
 			{
-				Count++;
+				ActivatedCharNum++;
 			}
 		}
 
-		if (Count != 0)
+		// If any are active, stop them.
+		if (ActivatedCharNum != 0)
 		{
 			bStopGauge = true;
 		}
@@ -60,8 +77,8 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 		{
 			bStopGauge = false;
 		}
-
-		Count = 0;
+		// Init ActivatedCharNum
+		ActivatedCharNum = 0;
 	}
 }
 
@@ -108,7 +125,7 @@ void AOperationIndigoPlayerController::InitSelection()
 void AOperationIndigoPlayerController::MoveToTile()
 {
 	
-	if (SelectedCharacter->bActivatedTurn)
+	if (SelectedCharacter->isActivated())
 	{
 		FHitResult Hit;
 		GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
@@ -117,10 +134,28 @@ void AOperationIndigoPlayerController::MoveToTile()
 			auto DestinationTile = Cast<ATile>(Hit.GetActor());
 			if (DestinationTile)
 			{
-				SelectedCharacter->MoveToTile(DestinationTile->GetActorLocation());
+				// Initialize each Controller
+				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
+				
+				if (PlayerController)
+				{
+					PlayerController->MoveToTile(DestinationTile->GetActorLocation());
+				}
+
+				/*auto EnemyController= Cast<AEnemyAIController>(SelectedCharacter->GetController());
+
+				if (EnemyController)
+				{
+					EnemyController->MoveToTile(DestinationTile->GetActorLocation());
+				}*/
 			}
 		}
 	}
+}
+
+const bool AOperationIndigoPlayerController::isBattlePhase()
+{
+	return bBattlePhase;
 }
 
 void AOperationIndigoPlayerController::RotateCamera()

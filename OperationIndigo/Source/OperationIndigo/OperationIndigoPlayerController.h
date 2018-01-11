@@ -8,6 +8,7 @@
 
 class AOperationIndigoCharacter;
 class ATacticalCamera;
+class ABattleHUD;
 
 UCLASS()
 class AOperationIndigoPlayerController : public APlayerController
@@ -25,7 +26,10 @@ public:
 
 	void MoveToTile();
 
-	const float HeatBarGauge = 100.f;
+	const float ActionBarGauge = 100.f;
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	const bool isBattlePhase();
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -49,7 +53,8 @@ protected:
 	AOperationIndigoCharacter* SelectedCharacter = nullptr;
 
 	bool bRotatedCamera = false;
-	// TODO: Controll for Battle Phase
+
+	// TODO: Control for Battle Phase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SetUp")
 	bool bBattlePhase = true;
 
@@ -57,9 +62,11 @@ protected:
 
 	void DeActivateBattlePhase();
 
-	int32 Count = 0;
+	int32 ActivatedCharNum = 0;
 
 	bool bStopGauge = false;
+
+	bool bMovedToCharacter = true;
 };
 
 

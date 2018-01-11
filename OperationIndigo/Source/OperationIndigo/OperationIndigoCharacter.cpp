@@ -10,9 +10,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
-#include "PlayerAIController.h"
 
 const float AOperationIndigoCharacter::GetGauge(){ return ActionGauge;}
+
+const float AOperationIndigoCharacter::GetSpeed(){ return GetCharacterMovement()->GetMaxSpeed();}
 
 AOperationIndigoCharacter::AOperationIndigoCharacter()
 {
@@ -40,22 +41,18 @@ void AOperationIndigoCharacter::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
 }
 
-void AOperationIndigoCharacter::MoveToTile(FVector Location)
+const bool AOperationIndigoCharacter::isActivated()
 {
-	if (bActivatedTurn)
-	{
-		auto Controller = Cast<APlayerAIController>(GetController());
-		if (Controller)
-		{
-			auto MoveToLocation = FMath::VInterpTo(this->GetActorLocation(), Location, GetWorld()->GetTimeSeconds(), GetCharacterMovement()->GetMaxSpeed());
-			Controller->MoveToLocation(MoveToLocation, 0.f);
-			bActivatedTurn = false;
-			ActionGauge = 0.f;
-		}
-	}
+	return bActivatedTurn;
 }
 
 void AOperationIndigoCharacter::InitTurn()
+{
+	bActivatedTurn = false;
+	ActionGauge = 0.f;
+}
+
+void AOperationIndigoCharacter::ActivatedTurn()
 {
 	bActivatedTurn = true;
 }

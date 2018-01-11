@@ -13,8 +13,8 @@ UCLASS()
 class OPERATIONINDIGO_API ABattleHUD : public AHUD
 {
 	GENERATED_BODY()
-	
-	
+public:
+	virtual void DrawHUD() override;
 	
 	
 };

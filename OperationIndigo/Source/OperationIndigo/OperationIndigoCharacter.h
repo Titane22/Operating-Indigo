@@ -18,16 +18,17 @@ protected:
 	// Gauge to activate turn
 	float ActionGauge = 0.f;
 
+	// it allows character to do action
+	bool bActivatedTurn = false;
+
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 public:
-	// it allows character to do action
-	bool bActivatedTurn = false;
-	
-	// it control Gauge
-	bool bCanRunGauge = true;
+	const bool isActivated();
 
 	const float GetGauge();
+
+	const float GetSpeed();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
 	bool bSelected = false;
@@ -40,11 +41,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
 	void SetDeSelected();
 
-	// Move character to Tile
-	void MoveToTile(FVector Location);
 	// initialize the Deactivate Turn State
 	void InitTurn();
 	
+	void ActivatedTurn();
 	// It called by OIController.
 	void RiseGauge();
 };
