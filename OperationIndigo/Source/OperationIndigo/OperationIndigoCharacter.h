@@ -18,8 +18,19 @@ protected:
 	// Gauge to activate turn
 	float ActionGauge = 0.f;
 
+	const float MaxGauge = 100.f;
+
 	// it allows character to do action
 	bool bActivatedTurn = false;
+
+	bool bIsAttacked = false;
+
+	int32 MovementRange = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
+	bool bSelected = false;
+
+	bool bStopGauge = false;
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
@@ -30,8 +41,7 @@ public:
 
 	const float GetSpeed();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
-	bool bSelected = false;
+	const bool isSelected();
 
 	AOperationIndigoCharacter();
 
@@ -47,5 +57,9 @@ public:
 	void ActivatedTurn();
 	// It called by OIController.
 	void RiseGauge();
+
+	void StopGauge();
+
+	int32 GetMovementRange();
 };
 

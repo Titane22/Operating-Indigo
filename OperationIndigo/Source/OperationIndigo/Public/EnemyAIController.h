@@ -17,12 +17,23 @@ class OPERATIONINDIGO_API AEnemyAIController : public AAIController
 	GENERATED_BODY()
 private:
 	AOperationIndigoCharacter* ControlledCharacter;
+
+	bool bOnAction = false;
+
+	bool bMoved = false;
+
+	bool bAttacked = false;
+
+	void ChoiceAction();
+	
+	void MoveToTile();
+
+	void Attack();
+
+	void EndOfTurn();
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	// Move character to Tile
-	void MoveToTile(FVector Location);
-
-	void EndOfTurn();
 	
 };

@@ -6,6 +6,24 @@
 void APlayerAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (bMoved && bAttacked)
+	{
+		EndOfTurn();
+	}
+	if (!bMoved && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+	{
+		if (bOnAction)
+		{
+			MoveToTile();
+		}
+	}
+	if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+	{
+		if (bOnAction)
+		{
+			Attack();
+		}
+	}
 }
 
 void APlayerAIController::BeginPlay()
@@ -14,18 +32,41 @@ void APlayerAIController::BeginPlay()
 	ControlledCharacter = Cast<AOperationIndigoCharacter>(GetPawn());
 }
 
-void APlayerAIController::MoveToTile(FVector Location)
+void APlayerAIController::MoveToTile()
 {
-	if (ControlledCharacter->isActivated())
+	if (ControlledCharacter->isActivated() && bSetLocation)
 	{
-		float Speed = ControlledCharacter->GetSpeed();
-		auto MoveLocation = FMath::VInterpTo(ControlledCharacter->GetActorLocation(), Location, GetWorld()->GetTimeSeconds(), Speed);
-		MoveToLocation(MoveLocation, 0.f);
+		MoveToLocation(Location, 0.f);
 		ControlledCharacter->InitTurn();
+		bMoved = true;
+		bSetLocation = false;
+		if (bMoved && bAttacked)
+		{
+			bOnAction = false;
+		}
 	}
 }
+
+void APlayerAIController::Attack()
+{
+	bAttacked = true;
+	if (bMoved && bAttacked)
+	{
+		bOnAction = false;
+	}
+}
+
 // TODO : Link to HUD when EndTurn(Widget) is created
 void APlayerAIController::EndOfTurn()
 {
+	bMoved = false;
+	bAttacked = false;
 	ControlledCharacter->InitTurn();
+}
+
+void APlayerAIController::SetDestination(FVector MoveLocation)
+{
+	float Speed = ControlledCharacter->GetSpeed();
+	Location = FMath::VInterpTo(ControlledCharacter->GetActorLocation(), MoveLocation, GetWorld()->GetTimeSeconds(), Speed);
+	bSetLocation = true;
 }

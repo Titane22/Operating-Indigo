@@ -11,9 +11,6 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
 
-const float AOperationIndigoCharacter::GetGauge(){ return ActionGauge;}
-
-const float AOperationIndigoCharacter::GetSpeed(){ return GetCharacterMovement()->GetMaxSpeed();}
 
 AOperationIndigoCharacter::AOperationIndigoCharacter()
 {
@@ -39,6 +36,14 @@ AOperationIndigoCharacter::AOperationIndigoCharacter()
 void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+	if (!bStopGauge && ActionGauge < MaxGauge)
+	{
+		RiseGauge();
+	}
+	else
+	{
+		ActivatedTurn();
+	}
 }
 
 const bool AOperationIndigoCharacter::isActivated()
@@ -61,3 +66,19 @@ void AOperationIndigoCharacter::RiseGauge()
 {
 	ActionGauge += ActionGaugePer*GetWorld()->GetDeltaSeconds();
 }
+
+void AOperationIndigoCharacter::StopGauge()
+{
+	bStopGauge = true;
+}
+
+int32 AOperationIndigoCharacter::GetMovementRange()
+{
+	return MovementRange;
+}
+
+const float AOperationIndigoCharacter::GetGauge(){ return ActionGauge;}
+
+const float AOperationIndigoCharacter::GetSpeed(){ return GetCharacterMovement()->GetMaxSpeed();}
+
+const bool AOperationIndigoCharacter::isSelected(){	return bSelected;}

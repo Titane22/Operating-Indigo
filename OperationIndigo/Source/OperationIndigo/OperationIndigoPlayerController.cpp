@@ -31,54 +31,46 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 
 	if (bBattlePhase)
 	{
-		for (auto Unit : UnitsInBattlePhase)
+		if (!bActivatedUnit)
 		{
-			// Stop when anyone is true.
-			if (!bStopGauge)
+			
+			// Find Activated Unit in UnitsInBattlePhase
+			for (auto Unit : UnitsInBattlePhase)
 			{
-				if (Unit->GetGauge() < ActionBarGauge)
+				if (Unit->isActivated())
 				{
-					Unit->RiseGauge();
-				}
-				else
-				{
-					Unit->ActivatedTurn();
-				}
-			}
-			else
-			{
-				// 
-				if (Unit->isActivated() && !bMovedToCharacter)
-				{
-					Unit->SetSelected();
-					auto PlayerCamera = GetPawn();
+					ActivatedCharacter = Unit;
+					ActivatedCharacter->SetSelected();
+					bActivatedUnit = true;
+					bStopGauge = true;
+
+					PlayerCamera = GetPawn();
 					auto MoveToLocation = Unit->GetActorLocation();
 					MoveToLocation.Z = PlayerCamera->GetActorLocation().Z;
 					PlayerCamera->SetActorLocation(MoveToLocation);
+					break;
 				}
 			}
-			//UE_LOG(LogTemp, Warning, TEXT("%s Gauge Ouput: %lf"), *Unit->GetName(), Unit->GetGauge())
 		}
-		// It check how many activated
-		for (auto Unit : UnitsInBattlePhase)
-		{
-			if (Unit->isActivated())
-			{
-				ActivatedCharNum++;
-			}
-		}
-
-		// If any are active, stop them.
-		if (ActivatedCharNum != 0)
-		{
-			bStopGauge = true;
-		}
+		// If any of UnitsInBattlePhase is activated
 		else
 		{
-			bStopGauge = false;
+			// Stop the Gauge.
+			if (bStopGauge)
+			{
+				for (auto Unit : UnitsInBattlePhase)
+				{
+					Unit->StopGauge();
+				}
+				bStopGauge = false;
+			}
+			// If ActivatedCharacter is deactivated, Find again.
+			if (!ActivatedCharacter->isActivated())
+			{
+				InitActivation();
+				bActivatedUnit = false;
+			}
 		}
-		// Init ActivatedCharNum
-		ActivatedCharNum = 0;
 	}
 }
 
@@ -122,34 +114,12 @@ void AOperationIndigoPlayerController::InitSelection()
 	}
 }
 
-void AOperationIndigoPlayerController::MoveToTile()
+void AOperationIndigoPlayerController::InitActivation()
 {
-	
-	if (SelectedCharacter->isActivated())
+	if (ActivatedCharacter)
 	{
-		FHitResult Hit;
-		GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
-		if (Hit.Actor != NULL)
-		{
-			auto DestinationTile = Cast<ATile>(Hit.GetActor());
-			if (DestinationTile)
-			{
-				// Initialize each Controller
-				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
-				
-				if (PlayerController)
-				{
-					PlayerController->MoveToTile(DestinationTile->GetActorLocation());
-				}
-
-				/*auto EnemyController= Cast<AEnemyAIController>(SelectedCharacter->GetController());
-
-				if (EnemyController)
-				{
-					EnemyController->MoveToTile(DestinationTile->GetActorLocation());
-				}*/
-			}
-		}
+		ActivatedCharacter->SetDeSelected();
+		SelectedCharacter = nullptr;
 	}
 }
 
@@ -171,11 +141,23 @@ void AOperationIndigoPlayerController::RotateCamera()
 		auto CameraPawn = Cast<ATacticalCamera>(GetPawn());
 		CameraPawn->RotateCamera();
 	}
-	//if character is selected, then actiavate MoveToTile
-	else if (SelectedCharacter)
+	else if(SelectedCharacter && SelectedCharacter==ActivatedCharacter)
 	{
-		MoveToTile();
+		FHitResult Hit;
+		GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
+		if (Hit.Actor != NULL)
+		{
+			auto DestinationTile = Cast<ATile>(Hit.GetActor());
+			if (DestinationTile)
+			{
+				auto MoveLocation = DestinationTile->GetActorLocation();
+				UE_LOG(LogTemp,Warning,TEXT("MoveLocation : %s"),*MoveLocation.ToString())
+				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
+				PlayerController->SetDestination(MoveLocation);
+			}
+		}
 	}
+	//if character is selected, then actiavate MoveToTile
 }
 
 void AOperationIndigoPlayerController::BranchReleased()

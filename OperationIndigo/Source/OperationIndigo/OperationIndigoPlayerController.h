@@ -24,9 +24,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Select")
 	void InitSelection();
 
-	void MoveToTile();
-
-	const float ActionBarGauge = 100.f;
+	void InitActivation();
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	const bool isBattlePhase();
@@ -62,11 +60,13 @@ protected:
 
 	void DeActivateBattlePhase();
 
-	int32 ActivatedCharNum = 0;
+	bool bActivatedUnit = false;
 
 	bool bStopGauge = false;
 
-	bool bMovedToCharacter = true;
+	AOperationIndigoCharacter* ActivatedCharacter = nullptr;
+
+	APawn* PlayerCamera;
 };
 
 
