@@ -6,24 +6,54 @@
 void APlayerAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	
+	if (ControlledCharacter && ControlledCharacter->isActivated())
+	{
+		CheckOnAction();
+		if (!bOnAction)
+		{
+			EndOfTurn();
+		}
+		else
+		{
+			// TODO : Replace to UEnum
+			if (!bMoved && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+			{
+				/*if (bOnAction)
+				{
+					MoveToTile();
+				}*/
+				if (bSetLocation)
+					bMoved = true;
+			}
+			if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+			{
+				/*if (bOnAction)
+				{
+					Attack();
+				}*/
+				bAttacked = true;
+			}
+		}//bOnAction
+	}
+}
+
+void APlayerAIController::CheckOnAction()
+{
+	/*UE_LOG(LogTemp, Warning, TEXT("On Action : %d"), bOnAction)
+	UE_LOG(LogTemp, Warning, TEXT("%s Moved : %d		Attacked : %d"), *ControlledCharacter->GetName(),bMoved,bAttacked)
+	if(ControlledCharacter)
+		UE_LOG(LogTemp, Warning, TEXT("Activated Turn : %d"), ControlledCharacter->isActivated())*/
+	
 	if (bMoved && bAttacked)
 	{
-		EndOfTurn();
+		bOnAction = false;
 	}
-	if (!bMoved && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+	else if (!bMoved && !bAttacked)
 	{
-		if (bOnAction)
-		{
-			MoveToTile();
-		}
+		bOnAction = true;
 	}
-	if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
-	{
-		if (bOnAction)
-		{
-			Attack();
-		}
-	}
+	
 }
 
 void APlayerAIController::BeginPlay()
@@ -37,23 +67,14 @@ void APlayerAIController::MoveToTile()
 	if (ControlledCharacter->isActivated() && bSetLocation)
 	{
 		MoveToLocation(Location, 0.f);
-		ControlledCharacter->InitTurn();
 		bMoved = true;
 		bSetLocation = false;
-		if (bMoved && bAttacked)
-		{
-			bOnAction = false;
-		}
 	}
 }
 
 void APlayerAIController::Attack()
 {
 	bAttacked = true;
-	if (bMoved && bAttacked)
-	{
-		bOnAction = false;
-	}
 }
 
 // TODO : Link to HUD when EndTurn(Widget) is created
@@ -61,6 +82,8 @@ void APlayerAIController::EndOfTurn()
 {
 	bMoved = false;
 	bAttacked = false;
+	bSetLocation = false;
+	UE_LOG(LogTemp, Warning, TEXT("%s Activated Turn "), *ControlledCharacter->GetName())
 	ControlledCharacter->InitTurn();
 }
 

@@ -40,10 +40,13 @@ void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 	{
 		RiseGauge();
 	}
-	else
+	else if(ActionGauge>MaxGauge)
 	{
-		ActivatedTurn();
+		ActivateTurn();
 	}
+	UE_LOG(LogTemp,Warning,TEXT("%s Action Gauge : %lf"), *this->GetName(),ActionGauge)
+	UE_LOG(LogTemp, Warning, TEXT("%s Activated Turn : %d"), *this->GetName(),bActivatedTurn)
+	UE_LOG(LogTemp, Warning, TEXT("%s Stop Gauge : %d"), *this->GetName(), bStopGauge)
 }
 
 const bool AOperationIndigoCharacter::isActivated()
@@ -57,7 +60,7 @@ void AOperationIndigoCharacter::InitTurn()
 	ActionGauge = 0.f;
 }
 
-void AOperationIndigoCharacter::ActivatedTurn()
+void AOperationIndigoCharacter::ActivateTurn()
 {
 	bActivatedTurn = true;
 }
@@ -72,6 +75,11 @@ void AOperationIndigoCharacter::StopGauge()
 	bStopGauge = true;
 }
 
+void AOperationIndigoCharacter::StartGauge()
+{
+	bStopGauge = false;
+}
+
 int32 AOperationIndigoCharacter::GetMovementRange()
 {
 	return MovementRange;
@@ -80,5 +88,7 @@ int32 AOperationIndigoCharacter::GetMovementRange()
 const float AOperationIndigoCharacter::GetGauge(){ return ActionGauge;}
 
 const float AOperationIndigoCharacter::GetSpeed(){ return GetCharacterMovement()->GetMaxSpeed();}
+
+const bool AOperationIndigoCharacter::GetStopGauge(){ return bStopGauge;}
 
 const bool AOperationIndigoCharacter::isSelected(){	return bSelected;}

@@ -29,6 +29,7 @@ private:
 	FVector Location;
 public:
 	virtual void Tick(float DeltaSeconds) override;
+	void CheckOnAction();
 	virtual void BeginPlay() override;
 	// Move character to Tile
 	void MoveToTile();

@@ -13,7 +13,7 @@ class AOperationIndigoCharacter : public ACharacter
 
 protected:
 	// Gague Rise Per Seconds
-	float ActionGaugePer = 10.f;
+	float ActionGaugePer = 20.f;
 
 	// Gauge to activate turn
 	float ActionGauge = 0.f;
@@ -41,6 +41,8 @@ public:
 
 	const float GetSpeed();
 
+	const bool GetStopGauge();
+
 	const bool isSelected();
 
 	AOperationIndigoCharacter();
@@ -54,11 +56,13 @@ public:
 	// initialize the Deactivate Turn State
 	void InitTurn();
 	
-	void ActivatedTurn();
+	void ActivateTurn();
 	// It called by OIController.
 	void RiseGauge();
 
 	void StopGauge();
+
+	void StartGauge();
 
 	int32 GetMovementRange();
 };

@@ -18,13 +18,15 @@ class OPERATIONINDIGO_API AEnemyAIController : public AAIController
 private:
 	AOperationIndigoCharacter* ControlledCharacter;
 
-	bool bOnAction = false;
+	bool bOnAction = true;
 
 	bool bMoved = false;
 
 	bool bAttacked = false;
 
 	void ChoiceAction();
+
+	void CheckOnAction();
 	
 	void MoveToTile();
 

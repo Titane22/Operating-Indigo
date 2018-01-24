@@ -28,22 +28,23 @@ void AOperationIndigoPlayerController::BeginPlay()
 void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
-
+	// If it is a Battle Phase
 	if (bBattlePhase)
 	{
 		if (!bActivatedUnit)
 		{
-			
 			// Find Activated Unit in UnitsInBattlePhase
 			for (auto Unit : UnitsInBattlePhase)
 			{
+				//UE_LOG(LogTemp,Warning,TEXT("Here"))
+				Unit->StartGauge();
+				//UE_LOG(LogTemp, Warning, TEXT("%s Activated Turn : %d"), *Unit->GetName(), Unit->isActivated())
 				if (Unit->isActivated())
 				{
-					ActivatedCharacter = Unit;
-					ActivatedCharacter->SetSelected();
+					SelectCharacter(Unit);
 					bActivatedUnit = true;
 					bStopGauge = true;
-
+					// Move Camera to Activated character
 					PlayerCamera = GetPawn();
 					auto MoveToLocation = Unit->GetActorLocation();
 					MoveToLocation.Z = PlayerCamera->GetActorLocation().Z;
@@ -64,13 +65,17 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 				}
 				bStopGauge = false;
 			}
-			// If ActivatedCharacter is deactivated, Find again.
-			if (!ActivatedCharacter->isActivated())
+			
+			// If All of ActivatedCharacter are deactivated, Find again.
+			// TODO : Optimizing
+			if (!SelectedCharacter->isActivated())
 			{
-				InitActivation();
+				InitSelection();
 				bActivatedUnit = false;
 			}
-		}
+
+
+		}//bActivatedUnit
 	}
 }
 
@@ -81,7 +86,6 @@ void AOperationIndigoPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("LeftMouseButton", IE_Pressed, this, &AOperationIndigoPlayerController::SelectionPressed);
 
-	//InputComponent->BindAction("RightMouseButton", IE_Released, this, &AUntitledNamedPlayerController::MoveReleased);
 	InputComponent->BindAction("RotateCamera", IE_Pressed, this, &AOperationIndigoPlayerController::RotateCamera);
 	InputComponent->BindAction("RotateCamera", IE_Released, this, &AOperationIndigoPlayerController::BranchReleased);
 }
@@ -90,11 +94,11 @@ void AOperationIndigoPlayerController::SelectionPressed()
 {
 	if (bBattlePhase)
 	{
-
+		// TODO : Can't select multiple character
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("false"))
+		// TODO : Can select multiple character
 	}
 }  
 
@@ -114,15 +118,6 @@ void AOperationIndigoPlayerController::InitSelection()
 	}
 }
 
-void AOperationIndigoPlayerController::InitActivation()
-{
-	if (ActivatedCharacter)
-	{
-		ActivatedCharacter->SetDeSelected();
-		SelectedCharacter = nullptr;
-	}
-}
-
 const bool AOperationIndigoPlayerController::isBattlePhase()
 {
 	return bBattlePhase;
@@ -130,6 +125,7 @@ const bool AOperationIndigoPlayerController::isBattlePhase()
 
 void AOperationIndigoPlayerController::RotateCamera()
 {
+	// Rotate the camera when Nobody is selected.
 	if (!SelectedCharacter)
 	{
 		// flag to set mouse event
@@ -141,19 +137,22 @@ void AOperationIndigoPlayerController::RotateCamera()
 		auto CameraPawn = Cast<ATacticalCamera>(GetPawn());
 		CameraPawn->RotateCamera();
 	}
-	else if(SelectedCharacter && SelectedCharacter==ActivatedCharacter)
+	else if(SelectedCharacter && SelectedCharacter->isActivated())
 	{
 		FHitResult Hit;
 		GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
 		if (Hit.Actor != NULL)
 		{
+			// Get Hit Tile
 			auto DestinationTile = Cast<ATile>(Hit.GetActor());
 			if (DestinationTile)
 			{
 				auto MoveLocation = DestinationTile->GetActorLocation();
-				UE_LOG(LogTemp,Warning,TEXT("MoveLocation : %s"),*MoveLocation.ToString())
 				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
-				PlayerController->SetDestination(MoveLocation);
+				if (PlayerController)
+				{
+					PlayerController->SetDestination(MoveLocation);
+				}
 			}
 		}
 	}
@@ -180,7 +179,6 @@ void AOperationIndigoPlayerController::ActivateBattlePhase()
 {
 	for (TActorIterator<AOperationIndigoCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		// Same as with the Object Iterator, access the subclass instance with the * or -> operators.
 		AOperationIndigoCharacter *FindCharacter = *ActorItr;
 		UnitsInBattlePhase.Add(FindCharacter);
 	}

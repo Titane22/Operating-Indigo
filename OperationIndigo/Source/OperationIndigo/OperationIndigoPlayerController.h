@@ -24,8 +24,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Select")
 	void InitSelection();
 
-	void InitActivation();
-
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	const bool isBattlePhase();
 protected:
@@ -64,9 +62,9 @@ protected:
 
 	bool bStopGauge = false;
 
-	AOperationIndigoCharacter* ActivatedCharacter = nullptr;
-
 	APawn* PlayerCamera;
+
+	int32 ActiveCharacterNumber = 0;
 };
 
 

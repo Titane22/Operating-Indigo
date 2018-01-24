@@ -5,26 +5,41 @@
 
 void AEnemyAIController::ChoiceAction()
 {
-	if (!bMoved && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+	// TODO : Replace to UEnum and Need Refactoring
+	
+}
+
+void AEnemyAIController::CheckOnAction()
+{
+	if (bMoved && bAttacked)
 	{
-		MoveToTile();
+		bOnAction = false;
 	}
-	if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
-	{
-		Attack();
-	}
+
 }
 
 void AEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (bMoved && bAttacked)
+	if (ControlledCharacter && ControlledCharacter->isActivated())
 	{
-		EndOfTurn();
-	}
-	else
-	{
-		ChoiceAction();
+		CheckOnAction();
+		if (!bOnAction)
+		{
+			EndOfTurn();
+		}
+		else
+		{
+			CheckOnAction();
+		}
+		if (!bMoved && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+		{
+			MoveToTile();
+		}
+		if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
+		{
+			Attack();
+		}
 	}
 }
 
@@ -47,6 +62,7 @@ void AEnemyAIController::Attack()
 // TODO : Link to HUD when EndTurn(Widget) is created
 void AEnemyAIController::EndOfTurn()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Here"))
 	bMoved = false;
 	bAttacked = false;
 	ControlledCharacter->InitTurn();
