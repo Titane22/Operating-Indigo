@@ -44,15 +44,10 @@ void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 	{
 		ActivateTurn();
 	}
-	UE_LOG(LogTemp,Warning,TEXT("%s Action Gauge : %lf"), *this->GetName(),ActionGauge)
-	UE_LOG(LogTemp, Warning, TEXT("%s Activated Turn : %d"), *this->GetName(),bActivatedTurn)
-	UE_LOG(LogTemp, Warning, TEXT("%s Stop Gauge : %d"), *this->GetName(), bStopGauge)
+	UE_LOG(LogTemp, Warning, TEXT("%s Action Gauge : %lf"),*this->GetName(),ActionGauge)
 }
 
-const bool AOperationIndigoCharacter::isActivated()
-{
-	return bActivatedTurn;
-}
+
 
 void AOperationIndigoCharacter::InitTurn()
 {
@@ -85,10 +80,6 @@ int32 AOperationIndigoCharacter::GetMovementRange()
 	return MovementRange;
 }
 
-const float AOperationIndigoCharacter::GetGauge(){ return ActionGauge;}
-
-const float AOperationIndigoCharacter::GetSpeed(){ return GetCharacterMovement()->GetMaxSpeed();}
-
-const bool AOperationIndigoCharacter::GetStopGauge(){ return bStopGauge;}
-
+const bool AOperationIndigoCharacter::isActivated(){ return bActivatedTurn;}
 const bool AOperationIndigoCharacter::isSelected(){	return bSelected;}
+const float AOperationIndigoCharacter::GetSpeed() { return GetCharacterMovement()->GetMaxSpeed(); }

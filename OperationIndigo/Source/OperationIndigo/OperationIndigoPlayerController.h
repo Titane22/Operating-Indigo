@@ -43,11 +43,6 @@ protected:
 
 	void BranchReleased();
 
-	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add to all character
-
-	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
-	AOperationIndigoCharacter* SelectedCharacter = nullptr;
-
 	bool bRotatedCamera = false;
 
 	// TODO: Control for Battle Phase
@@ -58,13 +53,17 @@ protected:
 
 	void DeActivateBattlePhase();
 
+	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	bool bActivatedUnit = false;
 
 	bool bStopGauge = false;
 
 	APawn* PlayerCamera;
 
-	int32 ActiveCharacterNumber = 0;
+	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add to all character
+
+	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
+	AOperationIndigoCharacter* SelectedCharacter = nullptr;
 };
 
 

@@ -36,9 +36,7 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 			// Find Activated Unit in UnitsInBattlePhase
 			for (auto Unit : UnitsInBattlePhase)
 			{
-				//UE_LOG(LogTemp,Warning,TEXT("Here"))
 				Unit->StartGauge();
-				//UE_LOG(LogTemp, Warning, TEXT("%s Activated Turn : %d"), *Unit->GetName(), Unit->isActivated())
 				if (Unit->isActivated())
 				{
 					SelectCharacter(Unit);
@@ -65,16 +63,12 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 				}
 				bStopGauge = false;
 			}
-			
-			// If All of ActivatedCharacter are deactivated, Find again.
-			// TODO : Optimizing
-			if (!SelectedCharacter->isActivated())
+			// If ActivatedCharacter is deactivated, Find again.
+			if (!SelectedCharacter->isActivated() && bActivatedUnit)
 			{
 				InitSelection();
 				bActivatedUnit = false;
 			}
-
-
 		}//bActivatedUnit
 	}
 }
@@ -84,7 +78,7 @@ void AOperationIndigoPlayerController::SetupInputComponent()
 	// set up gameplay key bindings
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction("LeftMouseButton", IE_Pressed, this, &AOperationIndigoPlayerController::SelectionPressed);
+	InputComponent->BindAction("Selection", IE_Pressed, this, &AOperationIndigoPlayerController::SelectionPressed);
 
 	InputComponent->BindAction("RotateCamera", IE_Pressed, this, &AOperationIndigoPlayerController::RotateCamera);
 	InputComponent->BindAction("RotateCamera", IE_Released, this, &AOperationIndigoPlayerController::BranchReleased);
@@ -95,6 +89,20 @@ void AOperationIndigoPlayerController::SelectionPressed()
 	if (bBattlePhase)
 	{
 		// TODO : Can't select multiple character
+		FHitResult Hit;
+		GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
+		auto HitCharacter = Cast<AOperationIndigoCharacter>(Hit.GetActor());
+		if (!bActivatedUnit)
+		{
+			if (HitCharacter)
+			{
+				SelectCharacter(HitCharacter);
+			}
+			else
+			{
+				InitSelection();
+			}
+		}
 	}
 	else
 	{
@@ -147,7 +155,7 @@ void AOperationIndigoPlayerController::RotateCamera()
 			auto DestinationTile = Cast<ATile>(Hit.GetActor());
 			if (DestinationTile)
 			{
-				auto MoveLocation = DestinationTile->GetActorLocation();
+				auto MoveLocation = DestinationTile->GetActorLocation()+(-100/2);
 				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
 				if (PlayerController)
 				{

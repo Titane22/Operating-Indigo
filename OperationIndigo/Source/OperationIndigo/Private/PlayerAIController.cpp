@@ -7,7 +7,7 @@ void APlayerAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	if (ControlledCharacter && ControlledCharacter->isActivated())
+	if (ControlledCharacter && ControlledCharacter->isActivated() && ControlledCharacter->isSelected())
 	{
 		CheckOnAction();
 		if (!bOnAction)
@@ -19,15 +19,14 @@ void APlayerAIController::Tick(float DeltaSeconds)
 			// TODO : Replace to UEnum
 			if (!bMoved && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
 			{
-				/*if (bOnAction)
+				if (bOnAction)
 				{
 					MoveToTile();
-				}*/
-				if (bSetLocation)
-					bMoved = true;
+				}
 			}
 			if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
 			{
+				// TODO : When I implement about Attack, delete comment
 				/*if (bOnAction)
 				{
 					Attack();
@@ -40,11 +39,7 @@ void APlayerAIController::Tick(float DeltaSeconds)
 
 void APlayerAIController::CheckOnAction()
 {
-	/*UE_LOG(LogTemp, Warning, TEXT("On Action : %d"), bOnAction)
-	UE_LOG(LogTemp, Warning, TEXT("%s Moved : %d		Attacked : %d"), *ControlledCharacter->GetName(),bMoved,bAttacked)
-	if(ControlledCharacter)
-		UE_LOG(LogTemp, Warning, TEXT("Activated Turn : %d"), ControlledCharacter->isActivated())*/
-	
+	// TODO : Replace to UEnum
 	if (bMoved && bAttacked)
 	{
 		bOnAction = false;
@@ -83,7 +78,6 @@ void APlayerAIController::EndOfTurn()
 	bMoved = false;
 	bAttacked = false;
 	bSetLocation = false;
-	UE_LOG(LogTemp, Warning, TEXT("%s Activated Turn "), *ControlledCharacter->GetName())
 	ControlledCharacter->InitTurn();
 }
 

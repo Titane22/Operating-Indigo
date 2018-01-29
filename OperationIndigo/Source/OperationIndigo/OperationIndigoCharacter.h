@@ -36,14 +36,8 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 public:
 	const bool isActivated();
-
-	const float GetGauge();
-
-	const float GetSpeed();
-
-	const bool GetStopGauge();
-
 	const bool isSelected();
+	const float GetSpeed();
 
 	AOperationIndigoCharacter();
 
