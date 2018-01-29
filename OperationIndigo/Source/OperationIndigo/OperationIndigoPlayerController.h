@@ -9,6 +9,7 @@
 class AOperationIndigoCharacter;
 class ATacticalCamera;
 class ABattleHUD;
+class AEnemyAIController;
 
 UCLASS()
 class AOperationIndigoPlayerController : public APlayerController
@@ -64,6 +65,8 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	AOperationIndigoCharacter* SelectedCharacter = nullptr;
+
+	AEnemyAIController* AIController = nullptr;
 };
 
 

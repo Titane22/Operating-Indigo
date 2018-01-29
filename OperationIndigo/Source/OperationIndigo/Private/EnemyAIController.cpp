@@ -23,8 +23,15 @@ void AEnemyAIController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (ControlledCharacter && ControlledCharacter->isActivated())
 	{
+		if (bStartTime)
+		{
+			bStartTime = false;
+			StartTurnTime= FPlatformTime::Seconds();
+		}
+
+		EndTurnTime = FPlatformTime::Seconds();
 		CheckOnAction();
-		if (!bOnAction)
+		if (!bOnAction && EndTurnTime - StartTurnTime>3.0f)
 		{
 			EndOfTurn();
 		}
@@ -62,8 +69,8 @@ void AEnemyAIController::Attack()
 // TODO : Link to HUD when EndTurn(Widget) is created
 void AEnemyAIController::EndOfTurn()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Here"))
 	bMoved = false;
 	bAttacked = false;
+	bStartTime = true;
 	ControlledCharacter->InitTurn();
 }

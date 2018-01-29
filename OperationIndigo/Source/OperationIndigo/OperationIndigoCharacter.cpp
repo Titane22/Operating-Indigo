@@ -44,7 +44,7 @@ void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 	{
 		ActivateTurn();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%s Action Gauge : %lf"),*this->GetName(),ActionGauge)
+	//UE_LOG(LogTemp, Warning, TEXT("%s Action Gauge : %lf"),*this->GetName(),ActionGauge)
 }
 
 

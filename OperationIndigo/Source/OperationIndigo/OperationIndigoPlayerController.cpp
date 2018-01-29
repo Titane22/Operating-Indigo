@@ -42,6 +42,11 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 					SelectCharacter(Unit);
 					bActivatedUnit = true;
 					bStopGauge = true;
+					AIController = Cast<AEnemyAIController>(Unit->GetController());
+					if (AIController)
+					{
+						AIController->bStartTime = true;
+					}
 					// Move Camera to Activated character
 					PlayerCamera = GetPawn();
 					auto MoveToLocation = Unit->GetActorLocation();
@@ -68,6 +73,10 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 			{
 				InitSelection();
 				bActivatedUnit = false;
+				if (AIController)
+				{
+					AIController = nullptr;
+				}
 			}
 		}//bActivatedUnit
 	}
@@ -88,10 +97,11 @@ void AOperationIndigoPlayerController::SelectionPressed()
 {
 	if (bBattlePhase)
 	{
-		// TODO : Can't select multiple character
+		// Can't select multiple character
 		FHitResult Hit;
 		GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
 		auto HitCharacter = Cast<AOperationIndigoCharacter>(Hit.GetActor());
+
 		if (!bActivatedUnit)
 		{
 			if (HitCharacter)
@@ -134,7 +144,7 @@ const bool AOperationIndigoPlayerController::isBattlePhase()
 void AOperationIndigoPlayerController::RotateCamera()
 {
 	// Rotate the camera when Nobody is selected.
-	if (!SelectedCharacter)
+	if (!SelectedCharacter|| AIController)
 	{
 		// flag to set mouse event
 		bRotatedCamera = true;

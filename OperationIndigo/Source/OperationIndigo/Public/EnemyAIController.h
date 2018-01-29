@@ -18,6 +18,10 @@ class OPERATIONINDIGO_API AEnemyAIController : public AAIController
 private:
 	AOperationIndigoCharacter* ControlledCharacter;
 
+	float StartTurnTime;
+	
+	float EndTurnTime;
+
 	bool bOnAction = true;
 
 	bool bMoved = false;
@@ -37,5 +41,5 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	// Move character to Tile
-	
+	bool bStartTime = false;
 };
