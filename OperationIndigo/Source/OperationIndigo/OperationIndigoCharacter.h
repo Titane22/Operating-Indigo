@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "OperationIndigoCharacter.generated.h"
 
+
+class ATile;
 UCLASS(Blueprintable)
 class AOperationIndigoCharacter : public ACharacter
 {
@@ -25,7 +27,27 @@ protected:
 
 	bool bIsAttacked = false;
 
-	int32 MovementRange = 10;
+	UPROPERTY(EditAnywhere, Category = "SetUp")
+	int32 MovementRange = 300;
+
+	UPROPERTY(EditAnywhere, Category = "SetUp")
+	int32 AttackRange = 300;
+
+	USphereComponent* MovementSphere = nullptr;
+
+	USphereComponent* AttackSphere = nullptr;
+
+	UPROPERTY(EditAnywhere,  BlueprintReadWrite, Category = "Grid")
+	TArray<ATile*> Grids;
+
+	UFUNCTION(BlueprintCallable, Category = "Select")
+	void InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset);
+
+	UFUNCTION(BlueprintCallable, Category = "Select")
+	void CollectGrids();
+
+	UFUNCTION(BlueprintCallable, Category = "Select")
+	void ResetCollisionSphere();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
 	bool bSelected = false;
@@ -34,8 +56,12 @@ protected:
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
+
+	//virtual void BeginPlay() override;
 public:
+	UFUNCTION(BlueprintCallable, Category = "Select")
 	const bool isActivated();
+
 	const bool isSelected();
 	const float GetSpeed();
 
@@ -50,14 +76,17 @@ public:
 	// initialize the Deactivate Turn State
 	void InitTurn();
 	
-	void ActivateTurn();
-	// It called by OIController.
+	void ReadyToStartTurn();
+
+	// It called by OI-Controller.
 	void RiseGauge();
 
 	void StopGauge();
 
 	void StartGauge();
 
-	int32 GetMovementRange();
+	void GenerateOverlapCollision();
+
+	TArray<ATile*> GetGrids();
 };
 

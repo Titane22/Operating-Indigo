@@ -5,11 +5,15 @@
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
+#include "Tile.h"
 #include "Materials/Material.h"
+#include "EngineMinimal.h"
+#include "Engine.h"
 
 
 AOperationIndigoCharacter::AOperationIndigoCharacter()
@@ -33,6 +37,8 @@ AOperationIndigoCharacter::AOperationIndigoCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+
+
 void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -42,12 +48,49 @@ void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 	}
 	else if(ActionGauge>MaxGauge)
 	{
-		ActivateTurn();
+		ReadyToStartTurn();
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("%s Action Gauge : %lf"),*this->GetName(),ActionGauge)
 }
 
 
+void AOperationIndigoCharacter::InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset)
+{
+	MovementSphere = MovementToSet;
+	AttackSphere = AttackToTset;
+}
+
+void AOperationIndigoCharacter::CollectGrids()
+{
+	if (MovementSphere && AttackSphere)
+	{
+		TArray<AActor*> Tiles;
+		MovementSphere->GetOverlappingActors(Tiles);
+		AttackSphere->GetOverlappingActors(Tiles);
+
+		for (auto Tile : Tiles)
+		{
+			auto Grid = Cast<ATile>(Tile);
+			if (Grid)
+			{
+				Grids.Add(Grid);
+			}
+		}
+	}
+}
+
+void AOperationIndigoCharacter::ResetCollisionSphere()
+{
+	if (MovementSphere)
+	{
+		MovementSphere = nullptr;
+	}
+	if (AttackSphere)
+	{
+		AttackSphere = nullptr;
+	}
+	Grids.Empty();
+}
 
 void AOperationIndigoCharacter::InitTurn()
 {
@@ -55,7 +98,7 @@ void AOperationIndigoCharacter::InitTurn()
 	ActionGauge = 0.f;
 }
 
-void AOperationIndigoCharacter::ActivateTurn()
+void AOperationIndigoCharacter::ReadyToStartTurn()
 {
 	bActivatedTurn = true;
 }
@@ -75,9 +118,15 @@ void AOperationIndigoCharacter::StartGauge()
 	bStopGauge = false;
 }
 
-int32 AOperationIndigoCharacter::GetMovementRange()
+void AOperationIndigoCharacter::GenerateOverlapCollision()
 {
-	return MovementRange;
+	MovementSphere->bGenerateOverlapEvents = !MovementSphere->bGenerateOverlapEvents;
+	AttackSphere->bGenerateOverlapEvents = !AttackSphere->bGenerateOverlapEvents;
+}
+
+TArray<ATile*> AOperationIndigoCharacter::GetGrids()
+{
+	return Grids;
 }
 
 const bool AOperationIndigoCharacter::isActivated(){ return bActivatedTurn;}

@@ -10,6 +10,7 @@ class AOperationIndigoCharacter;
 class ATacticalCamera;
 class ABattleHUD;
 class AEnemyAIController;
+class ATile;
 
 UCLASS()
 class AOperationIndigoPlayerController : public APlayerController
@@ -19,14 +20,18 @@ class AOperationIndigoPlayerController : public APlayerController
 public:
 	AOperationIndigoPlayerController();
 
-	UFUNCTION(BlueprintCallable, Category = "Select")
 	void SelectCharacter(AOperationIndigoCharacter* SelectCharacterToSet);
 
-	UFUNCTION(BlueprintCallable, Category = "Select")
 	void InitSelection();
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void InitGridArray(TArray<ATile*> GridsToSet);
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	const bool isBattlePhase();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Grid")
+	void ShowMovableTile(ATile* Tile);
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -37,7 +42,6 @@ protected:
 	virtual void SetupInputComponent() override;
 	// End PlayerController interface
 	
-	UFUNCTION(BlueprintCallable, Category = "Select")
 	void SelectionPressed();
 
 	void RotateCamera();

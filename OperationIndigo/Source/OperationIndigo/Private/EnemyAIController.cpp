@@ -23,15 +23,18 @@ void AEnemyAIController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (ControlledCharacter && ControlledCharacter->isActivated())
 	{
-		if (bStartTime)
+		// A temporary measure to show the Turn effect
+		if (!bStartTurn)
 		{
-			bStartTime = false;
 			StartTurnTime= FPlatformTime::Seconds();
 		}
+		else
+		{
+			EndTurnTime = FPlatformTime::Seconds();
+		}
 
-		EndTurnTime = FPlatformTime::Seconds();
 		CheckOnAction();
-		if (!bOnAction && EndTurnTime - StartTurnTime>3.0f)
+		if (!bOnAction && EndTurnTime - StartTurnTime>1.5f)
 		{
 			EndOfTurn();
 		}
@@ -71,6 +74,6 @@ void AEnemyAIController::EndOfTurn()
 {
 	bMoved = false;
 	bAttacked = false;
-	bStartTime = true;
+	bStartTurn = false;
 	ControlledCharacter->InitTurn();
 }

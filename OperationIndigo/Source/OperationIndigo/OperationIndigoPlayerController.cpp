@@ -45,7 +45,7 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 					AIController = Cast<AEnemyAIController>(Unit->GetController());
 					if (AIController)
 					{
-						AIController->bStartTime = true;
+						AIController->bStartTurn = true;
 					}
 					// Move Camera to Activated character
 					PlayerCamera = GetPawn();
@@ -68,6 +68,9 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 				}
 				bStopGauge = false;
 			}
+
+			
+			//
 			// If ActivatedCharacter is deactivated, Find again.
 			if (!SelectedCharacter->isActivated() && bActivatedUnit)
 			{
@@ -79,6 +82,22 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 				}
 			}
 		}//bActivatedUnit
+		FHitResult TraceHit;
+		
+		// Grid control by Mouse Trace
+		// Show Movable & Attackable Tile
+		if (SelectedCharacter)
+		{
+			auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
+			if (PlayerController)
+			{
+				auto Grids = SelectedCharacter->GetGrids();
+				for (auto Tile : Grids)
+				{
+					ShowMovableTile(Tile);
+				}
+			}
+		}
 	}
 }
 
@@ -136,6 +155,11 @@ void AOperationIndigoPlayerController::InitSelection()
 	}
 }
 
+void AOperationIndigoPlayerController::InitGridArray(TArray<ATile*> GridsToSet)
+{
+	//Grids = GridsToSet;
+}
+
 const bool AOperationIndigoPlayerController::isBattlePhase()
 {
 	return bBattlePhase;
@@ -165,7 +189,7 @@ void AOperationIndigoPlayerController::RotateCamera()
 			auto DestinationTile = Cast<ATile>(Hit.GetActor());
 			if (DestinationTile)
 			{
-				auto MoveLocation = DestinationTile->GetActorLocation()+(-100/2);
+				auto MoveLocation = DestinationTile->GetActorLocation();
 				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
 				if (PlayerController)
 				{
@@ -195,10 +219,13 @@ void AOperationIndigoPlayerController::BranchReleased()
 
 void AOperationIndigoPlayerController::ActivateBattlePhase()
 {
-	for (TActorIterator<AOperationIndigoCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		AOperationIndigoCharacter *FindCharacter = *ActorItr;
-		UnitsInBattlePhase.Add(FindCharacter);
+		AOperationIndigoCharacter* FindCharacter = Cast<AOperationIndigoCharacter>(*ActorItr);
+		if (FindCharacter)
+		{
+			UnitsInBattlePhase.Add(FindCharacter);
+		}
 	}
 }
 

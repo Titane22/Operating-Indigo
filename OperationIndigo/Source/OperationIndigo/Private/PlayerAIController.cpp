@@ -37,6 +37,12 @@ void APlayerAIController::Tick(float DeltaSeconds)
 	}
 }
 
+void APlayerAIController::BeginPlay()
+{
+	Super::BeginPlay();
+	ControlledCharacter = Cast<AOperationIndigoCharacter>(GetPawn());
+}
+
 void APlayerAIController::CheckOnAction()
 {
 	// TODO : Replace to UEnum
@@ -51,17 +57,12 @@ void APlayerAIController::CheckOnAction()
 	
 }
 
-void APlayerAIController::BeginPlay()
-{
-	Super::BeginPlay();
-	ControlledCharacter = Cast<AOperationIndigoCharacter>(GetPawn());
-}
-
 void APlayerAIController::MoveToTile()
 {
 	if (ControlledCharacter->isActivated() && bSetLocation)
 	{
 		MoveToLocation(Location, 0.f);
+		// TODO : True if the distance between the Character and Destination is the same
 		bMoved = true;
 		bSetLocation = false;
 	}
