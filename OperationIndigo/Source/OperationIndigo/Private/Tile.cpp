@@ -23,4 +23,73 @@ void ATile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ATile::SetMovable()
+{
+	TileState = ETileState::Movable;
+}
+
+void ATile::SetAttackable()
+{
+	TileState = ETileState::Attackable;
+}
+
+void ATile::SetNoneOfState()
+{
+	TileState = ETileState::None;
+}
+
+void ATile::SetTracing()
+{
+	TileState = ETileState::Tracing;
+}
+
+void ATile::SetObstacle()
+{
+	TileState = ETileState::Obstacle;
+}
+
+void ATile::SetOnTheActor()
+{
+	TileState = ETileState::OnTheActor;
+}
+
+void ATile::SetTracingMovable()
+{
+	TileState = ETileState::TracingMovable;
+}
+
+void ATile::SetTracingAttackable()
+{
+	TileState = ETileState::TracingAttackable;
+}
+
+bool ATile::isMovable()
+{
+	if (TileState == ETileState::Movable || TileState == ETileState::TracingMovable)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool ATile::isAttackable()
+{
+	if (TileState == ETileState::Attackable || TileState == ETileState::TracingAttackable)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+const ETileState ATile::GetTileState()
+{
+	return TileState;
+}
+
 

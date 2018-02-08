@@ -5,6 +5,7 @@
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "EngineUtils.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
+#include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "TacticalCamera.h"
 #include "PlayerAIController.h"
 #include "EnemyAIController.h"
@@ -68,9 +69,6 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 				}
 				bStopGauge = false;
 			}
-
-			
-			//
 			// If ActivatedCharacter is deactivated, Find again.
 			if (!SelectedCharacter->isActivated() && bActivatedUnit)
 			{
@@ -82,23 +80,147 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 				}
 			}
 		}//bActivatedUnit
-		FHitResult TraceHit;
-		
-		// Grid control by Mouse Trace
-		// Show Movable & Attackable Tile
-		if (SelectedCharacter)
+
+		// Grid Tracing control by Mouse
+		GridTracingControl();
+		ShowStateOfTile();
+	}
+}
+
+void AOperationIndigoPlayerController::GridTracingControl()
+{
+	FHitResult TraceHit;
+
+	FVector WorldLocation;
+	FVector WorldDirection;
+
+	FVector StartMousePos;
+	FVector EndMousePos;
+	DeprojectMousePositionToWorld(OUT WorldLocation, OUT WorldDirection);
+	StartMousePos = WorldLocation;
+	EndMousePos = WorldLocation + WorldDirection*5000.f;
+	FCollisionQueryParams CollisionParams;
+	
+	GetWorld()->LineTraceSingleByChannel(
+		TraceHit,
+		StartMousePos,
+		EndMousePos,
+		ECC_GameTraceChannel2
+	);
+
+	auto TraceActor = Cast<ATile>(TraceHit.GetActor());
+	// TODO : Change MoveRange System
+	EstimateTileState(TraceActor);
+}
+
+void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
+{
+	if (TraceActor)
+	{
+		if (TracingTile)
 		{
-			auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
-			if (PlayerController)
+			if (TracingTile == TraceActor) { return; }
+			// If not Tracing State
+			else if (
+				TracingTile->GetTileState() != ETileState::Tracing &&
+				TracingTile->GetTileState() != ETileState::TracingMovable &&
+				TracingTile->GetTileState() != ETileState::TracingAttackable
+				)
 			{
-				auto Grids = SelectedCharacter->GetGrids();
-				for (auto Tile : Grids)
+				switch (TraceActor->GetTileState())
 				{
-					ShowMovableTile(Tile);
+					case ETileState::None:
+						TracingTile = TraceActor;
+						TracingTile->SetTracing();
+						break;
+					case ETileState::Movable:
+						TracingTile = TraceActor;
+						TracingTile->SetTracingMovable();
+						break;
+					case ETileState::Attackable:
+						TracingTile = TraceActor;
+						TracingTile->SetTracingAttackable();
+						break;
 				}
 			}
+			// Trace Actor : Current Tracing Tile
+			if (TraceActor->GetTileState() == ETileState::None)
+			{
+				// Tracing Tile : Previous Tracing Tile
+				// A : Tracing Tile -> B : Trace Actor (None)
+				if (TracingTile->GetTileState() == ETileState::Tracing)
+				{
+					TracingTile->SetNoneOfState();
+					TracingTile = TraceActor;
+					TracingTile->SetTracing();
+				}
+				// TODO : Differentiate from Enemy Movable Tile
+				else if (TracingTile->GetTileState() == ETileState::TracingMovable)
+				{
+					TracingTile->SetMovable();
+					TracingTile = TraceActor;
+					TracingTile->SetTracing();
+				}
+				// TODO : Differentiate from Enemy Attackable Tile
+				else if (TracingTile->GetTileState() == ETileState::TracingAttackable)
+				{
+					TracingTile->SetAttackable();
+					TracingTile = TraceActor;
+					TracingTile->SetTracing();
+				}
+			}
+			// A : Tracing Tile -> B : Trace Actor (Movable)
+			else if (TraceActor->GetTileState() == ETileState::Movable)
+			{
+				if (TracingTile->GetTileState() == ETileState::Tracing)
+				{
+					TracingTile->SetNoneOfState();
+					TracingTile = TraceActor;
+					TracingTile->SetTracingMovable();
+				}
+				else if (TracingTile->GetTileState() == ETileState::TracingMovable)
+				{
+					TracingTile->SetMovable();
+					TracingTile = TraceActor;
+					TracingTile->SetTracingMovable();
+				}
+				else if (TracingTile->GetTileState() == ETileState::TracingAttackable)
+				{
+					TracingTile->SetAttackable();
+					TracingTile = TraceActor;
+					TracingTile->SetTracingMovable();
+				}
+			}
+			// A : Tracing Tile -> B : Trace Actor (Attackable)
+			else if (TraceActor->GetTileState() == ETileState::Attackable)
+			{
+				if (TracingTile->GetTileState() == ETileState::Tracing)
+				{
+					TracingTile->SetNoneOfState();
+					TracingTile = TraceActor;
+					TracingTile->SetTracingAttackable();
+				}
+				else if (TracingTile->GetTileState() == ETileState::TracingMovable)
+				{
+					TracingTile->SetMovable();
+					TracingTile = TraceActor;
+					TracingTile->SetTracingAttackable();
+				}
+				else if (TracingTile->GetTileState() == ETileState::TracingAttackable)
+				{
+					TracingTile->SetAttackable();
+					TracingTile = TraceActor;
+					TracingTile->SetTracingAttackable();
+				}
+			}
+		}// Tracing Tile
+		else if(TraceActor->GetTileState()==ETileState::None)
+		{
+			TracingTile = TraceActor;
+			// TODO : if(TraceActor!=ETileState::OnTheActor)
+			TracingTile->SetTracing();
 		}
-	}
+	} // TraceActor
 }
 
 void AOperationIndigoPlayerController::SetupInputComponent()
@@ -155,11 +277,6 @@ void AOperationIndigoPlayerController::InitSelection()
 	}
 }
 
-void AOperationIndigoPlayerController::InitGridArray(TArray<ATile*> GridsToSet)
-{
-	//Grids = GridsToSet;
-}
-
 const bool AOperationIndigoPlayerController::isBattlePhase()
 {
 	return bBattlePhase;
@@ -187,8 +304,9 @@ void AOperationIndigoPlayerController::RotateCamera()
 		{
 			// Get Hit Tile
 			auto DestinationTile = Cast<ATile>(Hit.GetActor());
-			if (DestinationTile)
+			if (DestinationTile && DestinationTile->isMovable())
 			{
+				TracingTile = nullptr;
 				auto MoveLocation = DestinationTile->GetActorLocation();
 				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
 				if (PlayerController)

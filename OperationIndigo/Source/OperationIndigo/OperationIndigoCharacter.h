@@ -6,7 +6,6 @@
 #include "GameFramework/Character.h"
 #include "OperationIndigoCharacter.generated.h"
 
-
 class ATile;
 UCLASS(Blueprintable)
 class AOperationIndigoCharacter : public ACharacter
@@ -38,7 +37,7 @@ protected:
 	USphereComponent* AttackSphere = nullptr;
 
 	UPROPERTY(EditAnywhere,  BlueprintReadWrite, Category = "Grid")
-	TArray<ATile*> Grids;
+	TArray<ATile*> Grid;
 
 	UFUNCTION(BlueprintCallable, Category = "Select")
 	void InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset);
@@ -53,6 +52,10 @@ protected:
 	bool bSelected = false;
 
 	bool bStopGauge = false;
+
+	bool bCanAttack = false;
+
+	bool bCanMove = false;
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
@@ -86,7 +89,5 @@ public:
 	void StartGauge();
 
 	void GenerateOverlapCollision();
-
-	TArray<ATile*> GetGrids();
 };
 

@@ -24,14 +24,12 @@ public:
 
 	void InitSelection();
 
-	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void InitGridArray(TArray<ATile*> GridsToSet);
-
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	const bool isBattlePhase();
 
+	// Shows material change of tile according to ETileState
 	UFUNCTION(BlueprintImplementableEvent, Category = "Grid")
-	void ShowMovableTile(ATile* Tile);
+	void ShowStateOfTile();
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -63,14 +61,21 @@ protected:
 
 	bool bStopGauge = false;
 
-	APawn* PlayerCamera;
+	APawn* PlayerCamera=nullptr;
 
 	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add to all character
+
+	TArray<ATile*> TilesInBattlePhase;
 
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	AOperationIndigoCharacter* SelectedCharacter = nullptr;
 
-	AEnemyAIController* AIController = nullptr;
+	AEnemyAIController* AIController = nullptr;	
+	
+	void GridTracingControl();
+	void EstimateTileState(ATile * TraceActor);
+private:
+	ATile* TracingTile=nullptr;
 };
 
 

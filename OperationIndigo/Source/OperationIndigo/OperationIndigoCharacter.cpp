@@ -62,18 +62,21 @@ void AOperationIndigoCharacter::InitCollisionSphere(USphereComponent* MovementTo
 
 void AOperationIndigoCharacter::CollectGrids()
 {
-	if (MovementSphere && AttackSphere)
+	// TODO : Change MoveRange System
+	if (MovementSphere)
 	{
 		TArray<AActor*> Tiles;
+		MovementSphere->bGenerateOverlapEvents = false;
 		MovementSphere->GetOverlappingActors(Tiles);
-		AttackSphere->GetOverlappingActors(Tiles);
+		//AttackSphere->GetOverlappingActors(Tiles);
 
 		for (auto Tile : Tiles)
 		{
-			auto Grid = Cast<ATile>(Tile);
-			if (Grid)
+			auto TileToSet = Cast<ATile>(Tile);
+			if (TileToSet)
 			{
-				Grids.Add(Grid);
+				TileToSet->SetMovable();
+				Grid.Add(TileToSet);
 			}
 		}
 	}
@@ -89,18 +92,27 @@ void AOperationIndigoCharacter::ResetCollisionSphere()
 	{
 		AttackSphere = nullptr;
 	}
-	Grids.Empty();
+	// Initialize State of Tile in Grid
+	for (auto Tile : Grid)
+	{
+		Tile->SetNoneOfState();
+	}
+	Grid.Empty();
 }
 
 void AOperationIndigoCharacter::InitTurn()
 {
 	bActivatedTurn = false;
 	ActionGauge = 0.f;
+	bCanAttack = false;
+	bCanMove = false;
 }
 
 void AOperationIndigoCharacter::ReadyToStartTurn()
 {
 	bActivatedTurn = true;
+	bCanAttack = true;
+	bCanMove = true;
 }
 
 void AOperationIndigoCharacter::RiseGauge()
@@ -122,11 +134,6 @@ void AOperationIndigoCharacter::GenerateOverlapCollision()
 {
 	MovementSphere->bGenerateOverlapEvents = !MovementSphere->bGenerateOverlapEvents;
 	AttackSphere->bGenerateOverlapEvents = !AttackSphere->bGenerateOverlapEvents;
-}
-
-TArray<ATile*> AOperationIndigoCharacter::GetGrids()
-{
-	return Grids;
 }
 
 const bool AOperationIndigoCharacter::isActivated(){ return bActivatedTurn;}

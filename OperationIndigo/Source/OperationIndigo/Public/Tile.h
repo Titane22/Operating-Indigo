@@ -6,6 +6,19 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+UENUM(BlueprintType)
+enum class ETileState : uint8
+{
+	Movable,
+	Attackable,
+	Obstacle,
+	Tracing,
+	OnTheActor,
+	TracingMovable,
+	TracingAttackable,
+	None
+};
+
 UCLASS()
 class OPERATIONINDIGO_API ATile : public AActor
 {
@@ -21,4 +34,29 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void SetMovable();
+
+	void SetAttackable();
+
+	void SetNoneOfState();
+
+	void SetTracing();
+
+	void SetObstacle();
+
+	void SetOnTheActor();
+
+	void SetTracingMovable();
+
+	void SetTracingAttackable();
+
+	bool isMovable();
+
+	bool isAttackable();
+
+	UFUNCTION(BlueprintCallable, Category="Grid")
+	const ETileState GetTileState();
+private:
+	ETileState TileState = ETileState::None;
 };
