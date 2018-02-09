@@ -22,6 +22,7 @@ void APlayerAIController::Tick(float DeltaSeconds)
 				if (bOnAction)
 				{
 					MoveToTile();
+					ControlledCharacter->MoveAction();
 				}
 			}
 			if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
@@ -32,6 +33,7 @@ void APlayerAIController::Tick(float DeltaSeconds)
 					Attack();
 				}*/
 				bAttacked = true;
+				//ControlledCharacter->AttackAction();
 			}
 		}//bOnAction
 	}

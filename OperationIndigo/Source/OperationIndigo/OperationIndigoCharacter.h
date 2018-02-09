@@ -89,5 +89,9 @@ public:
 	void StartGauge();
 
 	void GenerateOverlapCollision();
+
+	void MoveAction();
+
+	void AttackAction();
 };
 

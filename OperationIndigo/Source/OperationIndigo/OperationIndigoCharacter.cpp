@@ -63,22 +63,74 @@ void AOperationIndigoCharacter::InitCollisionSphere(USphereComponent* MovementTo
 void AOperationIndigoCharacter::CollectGrids()
 {
 	// TODO : Change MoveRange System
-	if (MovementSphere)
+	if (MovementSphere && AttackSphere)
 	{
-		TArray<AActor*> Tiles;
-		MovementSphere->bGenerateOverlapEvents = false;
-		MovementSphere->GetOverlappingActors(Tiles);
-		//AttackSphere->GetOverlappingActors(Tiles);
-
-		for (auto Tile : Tiles)
+		UE_LOG(LogTemp, Warning, TEXT("bCanMove : %d, bCanAttack : %d"),bCanMove,bCanAttack)
+		if (bCanMove && bCanAttack)
 		{
-			auto TileToSet = Cast<ATile>(Tile);
-			if (TileToSet)
+			UE_LOG(LogTemp,Warning,TEXT("Here"))
+			TArray<AActor*> Tiles;
+			MovementSphere->SetSphereRadius(MovementRange);
+			MovementSphere->GetOverlappingActors(OUT Tiles);
+
+			for (auto Tile : Tiles)
 			{
-				TileToSet->SetMovable();
-				Grid.Add(TileToSet);
+				auto TileToSet = Cast<ATile>(Tile);
+				if (TileToSet)
+				{
+					TileToSet->SetMovable();
+					Grid.Add(TileToSet);
+				}
 			}
-		}
+			Grid.Empty();
+			AttackSphere->SetSphereRadius(MovementRange + AttackRange);
+			AttackSphere->GetOverlappingActors(OUT Tiles);
+
+			for (auto Tile : Tiles)
+			{
+				auto TileToSet = Cast<ATile>(Tile);
+				if (TileToSet && !TileToSet->isMovable())
+				{
+					TileToSet->SetAttackable();
+					Grid.Add(TileToSet);
+				}
+			}
+
+		}// bCanMove & bCanAttack
+		else if (bCanMove && !bCanAttack)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Here2"))
+			TArray<AActor*> Tiles;
+			MovementSphere->SetSphereRadius(MovementRange);
+			MovementSphere->GetOverlappingActors(OUT Tiles);
+
+			for (auto Tile : Tiles)
+			{
+				auto TileToSet = Cast<ATile>(Tile);
+				if (TileToSet)
+				{
+					TileToSet->SetMovable();
+					Grid.Add(TileToSet);
+				}
+			}
+		}// bCanMove
+		else if (!bCanMove && bCanAttack)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Here3"))
+			TArray<AActor*> Tiles;
+			AttackSphere->SetSphereRadius(AttackRange);
+			AttackSphere->GetOverlappingActors(OUT Tiles);
+
+			for (auto Tile : Tiles)
+			{
+				auto TileToSet = Cast<ATile>(Tile);
+				if (TileToSet)
+				{
+					TileToSet->SetAttackable();
+					Grid.Add(TileToSet);
+				}
+			}
+		}// bCanAttack
 	}
 }
 
@@ -134,6 +186,24 @@ void AOperationIndigoCharacter::GenerateOverlapCollision()
 {
 	MovementSphere->bGenerateOverlapEvents = !MovementSphere->bGenerateOverlapEvents;
 	AttackSphere->bGenerateOverlapEvents = !AttackSphere->bGenerateOverlapEvents;
+}
+
+void AOperationIndigoCharacter::MoveAction()
+{
+	if (bCanMove)
+	{
+		bCanMove = false;
+		CollectGrids();
+	}
+}
+
+void AOperationIndigoCharacter::AttackAction()
+{
+	if (bCanAttack)
+	{
+		bCanAttack = false;
+		CollectGrids();
+	}
 }
 
 const bool AOperationIndigoCharacter::isActivated(){ return bActivatedTurn;}
