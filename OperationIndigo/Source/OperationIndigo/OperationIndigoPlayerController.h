@@ -30,6 +30,9 @@ public:
 	// Shows material change of tile according to ETileState
 	UFUNCTION(BlueprintImplementableEvent, Category = "Grid")
 	void ShowStateOfTile();
+
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	bool CheckPlayerController();
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -73,6 +76,7 @@ protected:
 	AEnemyAIController* AIController = nullptr;	
 	
 	void GridTracingControl();
+
 	void EstimateTileState(ATile * TraceActor);
 private:
 	ATile* TracingTile=nullptr;

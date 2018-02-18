@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 class AOperationIndigoCharacter;
 
 UCLASS()
@@ -21,12 +22,19 @@ private:
 	bool bOnAction = true;
 
 	bool bMoved = false;
+	bool bTempMovingState = false; // temporary
+	float StartTime;
+	float EndTime;
 
 	bool bAttacked = false;
 
 	bool bSetLocation = false;
 
+	bool bSetTargetToAttack = false;
+
 	FVector Location;
+
+	AOperationIndigoCharacter* Target = nullptr;
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	void CheckOnAction();
@@ -39,4 +47,6 @@ public:
 	void EndOfTurn();
 
 	void SetDestination(FVector MoveLocation);
+
+	void SetTargetToAttack(AOperationIndigoCharacter* TargetToAttack);
 };

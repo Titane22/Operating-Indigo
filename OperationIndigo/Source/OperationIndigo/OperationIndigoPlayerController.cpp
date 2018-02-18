@@ -282,6 +282,17 @@ const bool AOperationIndigoPlayerController::isBattlePhase()
 	return bBattlePhase;
 }
 
+bool AOperationIndigoPlayerController::CheckPlayerController()
+{
+	if (SelectedCharacter)
+	{
+		auto PlayerAIController = Cast<APlayerAIController>(SelectedCharacter->GetController());
+		if (PlayerAIController) { return true;	}
+		else {return false;	}
+	}
+	else{return false;}
+}
+
 void AOperationIndigoPlayerController::RotateCamera()
 {
 	// Rotate the camera when Nobody is selected.
@@ -304,16 +315,30 @@ void AOperationIndigoPlayerController::RotateCamera()
 		{
 			// Get Hit Tile
 			auto DestinationTile = Cast<ATile>(Hit.GetActor());
+			auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
+
 			if (DestinationTile && DestinationTile->isMovable())
 			{
 				TracingTile = nullptr;
 				auto MoveLocation = DestinationTile->GetActorLocation();
-				auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
+				
 				if (PlayerController)
 				{
 					PlayerController->SetDestination(MoveLocation);
+					SelectedCharacter->ResetCollisionSphere();
 				}
 			}
+			auto AttackToTarget = Cast<AOperationIndigoCharacter>(Hit.GetActor());
+			
+			if (AttackToTarget)
+			{
+				auto EnemyAI = Cast<AEnemyAIController>(AttackToTarget->GetController());
+				if (EnemyAI)
+				{
+					PlayerController->SetTargetToAttack(AttackToTarget);
+				}
+			}
+
 		}
 	}
 	//if character is selected, then actiavate MoveToTile

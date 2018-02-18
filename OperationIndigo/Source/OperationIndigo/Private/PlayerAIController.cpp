@@ -6,7 +6,7 @@
 void APlayerAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
+
 	if (ControlledCharacter && ControlledCharacter->isActivated() && ControlledCharacter->isSelected())
 	{
 		CheckOnAction();
@@ -22,20 +22,26 @@ void APlayerAIController::Tick(float DeltaSeconds)
 				if (bOnAction)
 				{
 					MoveToTile();
-					ControlledCharacter->MoveAction();
 				}
 			}
 			if (!bAttacked && ControlledCharacter->isSelected() && ControlledCharacter->isActivated())
 			{
-				// TODO : When I implement about Attack, delete comment
-				/*if (bOnAction)
+				if (bOnAction)
 				{
 					Attack();
-				}*/
-				bAttacked = true;
-				//ControlledCharacter->AttackAction();
+				}
 			}
 		}//bOnAction
+		/// Temporary
+		if (bTempMovingState)
+		{
+			EndTime += GetWorld()->GetDeltaSeconds();
+			if (EndTime - StartTime > 1.5f)
+			{
+				bTempMovingState = false;
+				ControlledCharacter->CollectGrids();
+			}
+		}
 	}
 }
 
@@ -56,23 +62,33 @@ void APlayerAIController::CheckOnAction()
 	{
 		bOnAction = true;
 	}
-	
 }
 
 void APlayerAIController::MoveToTile()
 {
-	if (ControlledCharacter->isActivated() && bSetLocation)
+	if (bSetLocation)
 	{
 		MoveToLocation(Location, 0.f);
 		// TODO : True if the distance between the Character and Destination is the same
 		bMoved = true;
 		bSetLocation = false;
+		ControlledCharacter->MoveAction();
+		/// temp
+		bTempMovingState = true;
+		EndTime = GetWorld()->GetDeltaSeconds();
+		StartTime = EndTime;
+		///
 	}
 }
 
 void APlayerAIController::Attack()
 {
-	bAttacked = true;
+	if (bSetTargetToAttack)
+	{
+		bAttacked = true;
+		UE_LOG(LogTemp,Warning,TEXT("Attack %s !!! "),*Target->GetName())
+		ControlledCharacter->AttackAction();
+	}
 }
 
 // TODO : Link to HUD when EndTurn(Widget) is created
@@ -81,6 +97,9 @@ void APlayerAIController::EndOfTurn()
 	bMoved = false;
 	bAttacked = false;
 	bSetLocation = false;
+	bSetTargetToAttack = false;
+
+	Target = nullptr;
 	ControlledCharacter->InitTurn();
 }
 
@@ -89,4 +108,11 @@ void APlayerAIController::SetDestination(FVector MoveLocation)
 	float Speed = ControlledCharacter->GetSpeed();
 	Location = FMath::VInterpTo(ControlledCharacter->GetActorLocation(), MoveLocation, GetWorld()->GetTimeSeconds(), Speed);
 	bSetLocation = true;
+}
+
+void APlayerAIController::SetTargetToAttack(AOperationIndigoCharacter * TargetToAttack)
+{
+	// TODO : Set target to attack in the OIPlayerController
+	Target = TargetToAttack;
+	bSetTargetToAttack = true;
 }

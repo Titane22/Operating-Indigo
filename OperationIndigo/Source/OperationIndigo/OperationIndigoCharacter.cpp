@@ -37,8 +37,6 @@ AOperationIndigoCharacter::AOperationIndigoCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
-
-
 void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -50,9 +48,7 @@ void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 	{
 		ReadyToStartTurn();
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("%s Action Gauge : %lf"),*this->GetName(),ActionGauge)
 }
-
 
 void AOperationIndigoCharacter::InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset)
 {
@@ -65,10 +61,8 @@ void AOperationIndigoCharacter::CollectGrids()
 	// TODO : Change MoveRange System
 	if (MovementSphere && AttackSphere)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("bCanMove : %d, bCanAttack : %d"),bCanMove,bCanAttack)
 		if (bCanMove && bCanAttack)
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Here"))
 			TArray<AActor*> Tiles;
 			MovementSphere->SetSphereRadius(MovementRange);
 			MovementSphere->GetOverlappingActors(OUT Tiles);
@@ -82,7 +76,7 @@ void AOperationIndigoCharacter::CollectGrids()
 					Grid.Add(TileToSet);
 				}
 			}
-			Grid.Empty();
+			//Grid.Empty();
 			AttackSphere->SetSphereRadius(MovementRange + AttackRange);
 			AttackSphere->GetOverlappingActors(OUT Tiles);
 
@@ -95,11 +89,9 @@ void AOperationIndigoCharacter::CollectGrids()
 					Grid.Add(TileToSet);
 				}
 			}
-
 		}// bCanMove & bCanAttack
 		else if (bCanMove && !bCanAttack)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Here2"))
 			TArray<AActor*> Tiles;
 			MovementSphere->SetSphereRadius(MovementRange);
 			MovementSphere->GetOverlappingActors(OUT Tiles);
@@ -116,7 +108,6 @@ void AOperationIndigoCharacter::CollectGrids()
 		}// bCanMove
 		else if (!bCanMove && bCanAttack)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Here3"))
 			TArray<AActor*> Tiles;
 			AttackSphere->SetSphereRadius(AttackRange);
 			AttackSphere->GetOverlappingActors(OUT Tiles);
@@ -136,11 +127,11 @@ void AOperationIndigoCharacter::CollectGrids()
 
 void AOperationIndigoCharacter::ResetCollisionSphere()
 {
-	if (MovementSphere)
+	if (MovementSphere && !bCanMove)
 	{
 		MovementSphere = nullptr;
 	}
-	if (AttackSphere)
+	if (AttackSphere && !bCanAttack)
 	{
 		AttackSphere = nullptr;
 	}
@@ -162,9 +153,12 @@ void AOperationIndigoCharacter::InitTurn()
 
 void AOperationIndigoCharacter::ReadyToStartTurn()
 {
-	bActivatedTurn = true;
-	bCanAttack = true;
-	bCanMove = true;
+	if (!bActivatedTurn)
+	{
+		bActivatedTurn = true;
+		bCanAttack = true;
+		bCanMove = true;
+	}
 }
 
 void AOperationIndigoCharacter::RiseGauge()
@@ -193,7 +187,6 @@ void AOperationIndigoCharacter::MoveAction()
 	if (bCanMove)
 	{
 		bCanMove = false;
-		CollectGrids();
 	}
 }
 
@@ -202,7 +195,6 @@ void AOperationIndigoCharacter::AttackAction()
 	if (bCanAttack)
 	{
 		bCanAttack = false;
-		CollectGrids();
 	}
 }
 

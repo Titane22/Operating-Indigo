@@ -6,6 +6,14 @@
 #include "GameFramework/Character.h"
 #include "OperationIndigoCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	Idle,
+	Moving,
+	Attacking
+};
+
 class ATile;
 UCLASS(Blueprintable)
 class AOperationIndigoCharacter : public ACharacter
@@ -39,15 +47,6 @@ protected:
 	UPROPERTY(EditAnywhere,  BlueprintReadWrite, Category = "Grid")
 	TArray<ATile*> Grid;
 
-	UFUNCTION(BlueprintCallable, Category = "Select")
-	void InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset);
-
-	UFUNCTION(BlueprintCallable, Category = "Select")
-	void CollectGrids();
-
-	UFUNCTION(BlueprintCallable, Category = "Select")
-	void ResetCollisionSphere();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
 	bool bSelected = false;
 
@@ -59,13 +58,13 @@ protected:
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
-
 	//virtual void BeginPlay() override;
 public:
 	UFUNCTION(BlueprintCallable, Category = "Select")
 	const bool isActivated();
 
 	const bool isSelected();
+
 	const float GetSpeed();
 
 	AOperationIndigoCharacter();
@@ -93,5 +92,14 @@ public:
 	void MoveAction();
 
 	void AttackAction();
+
+	UFUNCTION(BlueprintCallable, Category = "Select")
+	void CollectGrids();
+
+	UFUNCTION(BlueprintCallable, Category = "Select")
+	void ResetCollisionSphere();
+
+	UFUNCTION(BlueprintCallable, Category = "Select")
+	void InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset);
 };
 
