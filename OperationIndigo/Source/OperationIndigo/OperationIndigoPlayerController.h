@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Blueprint/UserWidget.h"
 #include "OperationIndigoPlayerController.generated.h"
 
 class AOperationIndigoCharacter;
@@ -31,8 +32,14 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Grid")
 	void ShowStateOfTile();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "UMG")
+	void ShowEndTurn();
+
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	bool CheckPlayerController();
+
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	AOperationIndigoCharacter* GetActivatedCharacter() const;
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -74,7 +81,7 @@ protected:
 	AOperationIndigoCharacter* SelectedCharacter = nullptr;
 
 	AEnemyAIController* AIController = nullptr;	
-	
+
 	void GridTracingControl();
 
 	void EstimateTileState(ATile * TraceActor);

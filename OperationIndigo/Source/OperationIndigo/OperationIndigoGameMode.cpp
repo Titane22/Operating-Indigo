@@ -2,8 +2,25 @@
 
 #include "OperationIndigoGameMode.h"
 #include "OperationIndigoPlayerController.h"
-#include "OperationIndigoCharacter.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "TacticalCamera.h"
+#include "Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
+
+void AOperationIndigoGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (PlayerHUDClass)
+	{
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDClass);
+
+		if (CurrentWidget != nullptr)
+		{
+			CurrentWidget->AddToViewport();
+		}
+	}
+}
 
 AOperationIndigoGameMode::AOperationIndigoGameMode()
 {

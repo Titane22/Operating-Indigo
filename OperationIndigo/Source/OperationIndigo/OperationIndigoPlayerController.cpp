@@ -23,7 +23,9 @@ AOperationIndigoPlayerController::AOperationIndigoPlayerController()
 
 void AOperationIndigoPlayerController::BeginPlay()
 {
+	Super::BeginPlay();
 	ActivateBattlePhase();
+	SetInputMode(FInputModeGameAndUI());
 }
 
 void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
@@ -80,7 +82,7 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 				}
 			}
 		}//bActivatedUnit
-
+		
 		// Grid Tracing control by Mouse
 		GridTracingControl();
 		ShowStateOfTile();
@@ -293,6 +295,12 @@ bool AOperationIndigoPlayerController::CheckPlayerController()
 	else{return false;}
 }
 
+AOperationIndigoCharacter* AOperationIndigoPlayerController::GetActivatedCharacter() const
+{
+	if (bActivatedUnit)	return SelectedCharacter;
+	else return nullptr;
+}
+
 void AOperationIndigoPlayerController::RotateCamera()
 {
 	// Rotate the camera when Nobody is selected.
@@ -317,29 +325,38 @@ void AOperationIndigoPlayerController::RotateCamera()
 			auto DestinationTile = Cast<ATile>(Hit.GetActor());
 			auto PlayerController = Cast<APlayerAIController>(SelectedCharacter->GetController());
 
-			if (DestinationTile && DestinationTile->isMovable())
-			{
-				TracingTile = nullptr;
-				auto MoveLocation = DestinationTile->GetActorLocation();
-				
-				if (PlayerController)
+			if (DestinationTile) {
+				// Check if it is Movable Destination Tile
+				if (DestinationTile->isMovable())
 				{
-					PlayerController->SetDestination(MoveLocation);
-					SelectedCharacter->ResetCollisionSphere();
-				}
-			}
-			auto AttackToTarget = Cast<AOperationIndigoCharacter>(Hit.GetActor());
-			
-			if (AttackToTarget)
-			{
-				auto EnemyAI = Cast<AEnemyAIController>(AttackToTarget->GetController());
-				if (EnemyAI)
-				{
-					PlayerController->SetTargetToAttack(AttackToTarget);
-				}
-			}
+					UE_LOG(LogTemp,Warning,TEXT("HERE"))
+					TracingTile = nullptr;
+					auto MoveLocation = DestinationTile->GetActorLocation();
 
-		}
+					if (PlayerController)
+					{
+						PlayerController->SetDestination(MoveLocation);
+						SelectedCharacter->ResetCollisionSphere();
+					}
+				}
+
+				// Check if it is Attackable Destination Tile
+				
+				if (DestinationTile->isAttackable())
+				{
+					TracingTile = nullptr;
+					auto AttackToTarget = Cast<AOperationIndigoCharacter>(Hit.GetActor());
+					if (AttackToTarget)
+					{
+						auto EnemyAI = Cast<AEnemyAIController>(AttackToTarget->GetController());
+						if (EnemyAI)
+						{
+							PlayerController->SetTargetToAttack(AttackToTarget);
+						}
+					}
+				}
+			} // Destination Tile
+		} // Hit.Actor
 	}
 	//if character is selected, then actiavate MoveToTile
 }

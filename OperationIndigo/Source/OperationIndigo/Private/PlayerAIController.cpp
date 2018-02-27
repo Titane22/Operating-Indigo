@@ -32,6 +32,7 @@ void APlayerAIController::Tick(float DeltaSeconds)
 				}
 			}
 		}//bOnAction
+
 		/// Temporary
 		if (bTempMovingState)
 		{
@@ -42,6 +43,7 @@ void APlayerAIController::Tick(float DeltaSeconds)
 				ControlledCharacter->CollectGrids();
 			}
 		}
+		///
 	}
 }
 
@@ -68,7 +70,8 @@ void APlayerAIController::MoveToTile()
 {
 	if (bSetLocation)
 	{
-		MoveToLocation(Location, 0.f);
+		ControlledCharacter->SetActorLocation(Location);
+		//MoveToLocation(Location, 0.f);
 		// TODO : True if the distance between the Character and Destination is the same
 		bMoved = true;
 		bSetLocation = false;
@@ -115,4 +118,10 @@ void APlayerAIController::SetTargetToAttack(AOperationIndigoCharacter * TargetTo
 	// TODO : Set target to attack in the OIPlayerController
 	Target = TargetToAttack;
 	bSetTargetToAttack = true;
+}
+
+AOperationIndigoCharacter * APlayerAIController::GetControlledCharacter() const
+{
+	if (ControlledCharacter) { return ControlledCharacter; }
+	else return nullptr;
 }

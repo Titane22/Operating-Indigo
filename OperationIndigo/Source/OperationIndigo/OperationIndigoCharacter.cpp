@@ -35,6 +35,8 @@ AOperationIndigoCharacter::AOperationIndigoCharacter()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	CurrentHitPoint = InitialHitPoint;
 }
 
 void AOperationIndigoCharacter::Tick(float DeltaSeconds)
@@ -50,10 +52,24 @@ void AOperationIndigoCharacter::Tick(float DeltaSeconds)
 	}
 }
 
-void AOperationIndigoCharacter::InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset)
+float AOperationIndigoCharacter::GetCurrentHitPoint() const
 {
-	MovementSphere = MovementToSet;
-	AttackSphere = AttackToTset;
+	return CurrentHitPoint / InitialHitPoint;
+}
+
+void AOperationIndigoCharacter::UpdateCurrentHitPoint(float HitPoint)
+{
+	CurrentHitPoint -= (int32)HitPoint;
+}
+
+void AOperationIndigoCharacter::InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToSet)
+{
+	if (MovementToSet) {
+		MovementSphere = MovementToSet;
+	}
+	if (AttackToSet) {
+		AttackSphere = AttackToSet;
+	}
 }
 
 void AOperationIndigoCharacter::CollectGrids()
@@ -76,7 +92,7 @@ void AOperationIndigoCharacter::CollectGrids()
 					Grid.Add(TileToSet);
 				}
 			}
-			//Grid.Empty();
+
 			AttackSphere->SetSphereRadius(MovementRange + AttackRange);
 			AttackSphere->GetOverlappingActors(OUT Tiles);
 
@@ -174,12 +190,6 @@ void AOperationIndigoCharacter::StopGauge()
 void AOperationIndigoCharacter::StartGauge()
 {
 	bStopGauge = false;
-}
-
-void AOperationIndigoCharacter::GenerateOverlapCollision()
-{
-	MovementSphere->bGenerateOverlapEvents = !MovementSphere->bGenerateOverlapEvents;
-	AttackSphere->bGenerateOverlapEvents = !AttackSphere->bGenerateOverlapEvents;
 }
 
 void AOperationIndigoCharacter::MoveAction()

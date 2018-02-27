@@ -49,4 +49,7 @@ public:
 	void SetDestination(FVector MoveLocation);
 
 	void SetTargetToAttack(AOperationIndigoCharacter* TargetToAttack);
+
+	UFUNCTION(BlueprintCallable,Category="Setup")
+	AOperationIndigoCharacter* GetControlledCharacter() const;
 };
