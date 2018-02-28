@@ -44,6 +44,7 @@ public:
 	
 	void Attack();
 	
+	UFUNCTION(BlueprintCallable, Category = "Select")
 	void EndOfTurn();
 
 	void SetDestination(FVector MoveLocation);

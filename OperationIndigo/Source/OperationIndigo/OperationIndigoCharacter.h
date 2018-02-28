@@ -96,7 +96,6 @@ public:
 	void SetDeSelected();
 
 	// initialize the Deactivate Turn State
-	UFUNCTION(BlueprintCallable, Category="Select")
 	void InitTurn();
 	
 	// Activate Turn of this Character

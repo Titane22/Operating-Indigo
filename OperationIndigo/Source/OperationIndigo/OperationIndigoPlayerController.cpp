@@ -329,10 +329,8 @@ void AOperationIndigoPlayerController::RotateCamera()
 				// Check if it is Movable Destination Tile
 				if (DestinationTile->isMovable())
 				{
-					UE_LOG(LogTemp,Warning,TEXT("HERE"))
 					TracingTile = nullptr;
 					auto MoveLocation = DestinationTile->GetActorLocation();
-
 					if (PlayerController)
 					{
 						PlayerController->SetDestination(MoveLocation);
@@ -341,21 +339,35 @@ void AOperationIndigoPlayerController::RotateCamera()
 				}
 
 				// Check if it is Attackable Destination Tile
-				
 				if (DestinationTile->isAttackable())
 				{
-					TracingTile = nullptr;
-					auto AttackToTarget = Cast<AOperationIndigoCharacter>(Hit.GetActor());
+					// TODO : Store Enemy on the tile
+					/*auto AttackToTarget = Cast<AOperationIndigoCharacter>(Hit.GetActor());
 					if (AttackToTarget)
 					{
+						TracingTile = nullptr;
 						auto EnemyAI = Cast<AEnemyAIController>(AttackToTarget->GetController());
 						if (EnemyAI)
 						{
 							PlayerController->SetTargetToAttack(AttackToTarget);
 						}
+					}*/
+				}
+			} //Destination Tile
+
+			else // Hit actor is not Tile
+			{
+				auto AttackToTarget = Cast<AOperationIndigoCharacter>(Hit.GetActor());
+				if (AttackToTarget)
+				{
+					TracingTile = nullptr;
+					auto EnemyAI = Cast<AEnemyAIController>(AttackToTarget->GetController());
+					if (EnemyAI)
+					{
+						PlayerController->SetTargetToAttack(AttackToTarget);
 					}
 				}
-			} // Destination Tile
+			}
 		} // Hit.Actor
 	}
 	//if character is selected, then actiavate MoveToTile

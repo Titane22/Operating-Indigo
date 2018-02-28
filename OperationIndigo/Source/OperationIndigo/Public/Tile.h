@@ -17,6 +17,7 @@ enum class ETileState : uint8
 	TracingMovable,
 	TracingAttackable,
 	None
+	// Add a Tile state below the Enemy
 };
 
 UCLASS()
