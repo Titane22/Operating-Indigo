@@ -59,7 +59,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Select")
 	bool bSelected = false;
 
-	bool bStopGauge = false;
+	bool bStopGauge = true;
 
 	/** Control Character State */
 	bool bCanAttack = false;
@@ -69,7 +69,6 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 	// virtual void BeginPlay() override;
 public:
-
 	// Accessor function for Current HitPoint
 	UFUNCTION(BlueprintPure, Category = "Character")
 	float GetCurrentHitPoint() const;
@@ -127,5 +126,8 @@ public:
 	// When Character is Activated, Initialize MovementSphere or AttackSphere from Blueprint
 	UFUNCTION(BlueprintCallable, Category = "Select")
 	void InitCollisionSphere(USphereComponent* MovementToSet, USphereComponent* AttackToTset);
+
+	//When Game is activate the battle phase, move to the shortest tile
+	void MoveToShortestTile();
 };
 

@@ -24,7 +24,7 @@ AOperationIndigoPlayerController::AOperationIndigoPlayerController()
 void AOperationIndigoPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	ActivateBattlePhase();
+	//ActivateBattlePhase();
 	SetInputMode(FInputModeGameAndUI());
 }
 
@@ -391,17 +391,25 @@ void AOperationIndigoPlayerController::BranchReleased()
 
 void AOperationIndigoPlayerController::ActivateBattlePhase()
 {
+	bBattlePhase = true;
 	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		AOperationIndigoCharacter* FindCharacter = Cast<AOperationIndigoCharacter>(*ActorItr);
 		if (FindCharacter)
 		{
 			UnitsInBattlePhase.Add(FindCharacter);
+			FindCharacter->MoveToShortestTile();
 		}
 	}
 }
 
 void AOperationIndigoPlayerController::DeActivateBattlePhase()
 {
+	bBattlePhase = false;
+	// TODO : Delete Dead State Character
+
+	for (auto Unit : UnitsInBattlePhase)
+		Unit->StopGauge();
+
 	UnitsInBattlePhase.Empty();
 }

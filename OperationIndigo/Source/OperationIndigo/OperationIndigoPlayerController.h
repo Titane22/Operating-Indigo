@@ -23,6 +23,7 @@ public:
 
 	void SelectCharacter(AOperationIndigoCharacter* SelectCharacterToSet);
 
+	// Initialize SelectedCharacter
 	void InitSelection();
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
@@ -32,14 +33,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Grid")
 	void ShowStateOfTile();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "UMG")
-	void ShowEndTurn();
-
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	bool CheckPlayerController();
 
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	AOperationIndigoCharacter* GetActivatedCharacter() const;
+
+	// Activate Battle Phase, Get All Characters in to UnitsInBattlePhase
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void ActivateBattlePhase();
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -50,42 +52,51 @@ protected:
 	virtual void SetupInputComponent() override;
 	// End PlayerController interface
 	
+	// Left Mouse button Pressed
 	void SelectionPressed();
 
+	// Right Mouse Button Pressed
 	void RotateCamera();
 
+	// Right Mouse button Released
 	void BranchReleased();
 
+	// Variable for controlling the gauge
 	bool bRotatedCamera = false;
 
-	// TODO: Control for Battle Phase
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SetUp")
-	bool bBattlePhase = true;
+	// Control for Battle Phase
+	bool bBattlePhase = false;
 
-	void ActivateBattlePhase();
-
+	// Deactivate Battle Phase, Empty the UnitsInBattlePhase
 	void DeActivateBattlePhase();
 
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	bool bActivatedUnit = false;
 
+	// Bool for stopping the gauge
 	bool bStopGauge = false;
 
+	// Main Camera
 	APawn* PlayerCamera=nullptr;
 
-	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add to all character
+	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
+	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add all character
 
 	TArray<ATile*> TilesInBattlePhase;
 
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	AOperationIndigoCharacter* SelectedCharacter = nullptr;
 
+	// Find AI Controller from Current Selected Character
 	AEnemyAIController* AIController = nullptr;	
 
+	// Show Tile's Material according to Grid state.
 	void GridTracingControl();
 
+	// 
 	void EstimateTileState(ATile * TraceActor);
 private:
+	// Current tracing tile
 	ATile* TracingTile=nullptr;
 };
 

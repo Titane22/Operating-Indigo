@@ -89,6 +89,7 @@ void APlayerAIController::Attack()
 	if (bSetTargetToAttack)
 	{
 		bAttacked = true;
+		// Caculate Damage using 
 		UE_LOG(LogTemp,Warning,TEXT("Attack %s !!! "),*Target->GetName())
 		ControlledCharacter->AttackAction();
 	}
