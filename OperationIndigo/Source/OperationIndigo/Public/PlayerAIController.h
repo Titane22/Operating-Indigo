@@ -23,6 +23,7 @@ private:
 
 	bool bMoved = false;
 	bool bTempMovingState = false; // temporary
+	bool bTempAttackingState = false;
 	float StartTime;
 	float EndTime;
 

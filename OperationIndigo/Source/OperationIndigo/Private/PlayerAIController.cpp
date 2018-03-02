@@ -43,6 +43,16 @@ void APlayerAIController::Tick(float DeltaSeconds)
 				ControlledCharacter->CollectGrids();
 			}
 		}
+
+		if (bTempAttackingState)
+		{
+			EndTime += GetWorld()->GetDeltaSeconds();
+			if (EndTime - StartTime > 1.5f)
+			{
+				bTempAttackingState = false;
+				ControlledCharacter->CollectGrids();
+			}
+		}
 		///
 	}
 }
@@ -92,6 +102,7 @@ void APlayerAIController::Attack()
 		// Caculate Damage using 
 		UE_LOG(LogTemp,Warning,TEXT("Attack %s !!! "),*Target->GetName())
 		ControlledCharacter->AttackAction();
+		bTempAttackingState = true;
 	}
 }
 

@@ -76,19 +76,13 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 {
 	TArray<AActor*> Tiles;
 	auto CapsuleComponent = GetCapsuleComponent();
-	UE_LOG(LogTemp, Warning, TEXT("CapsuleComponent : %s"), *CapsuleComponent->GetName())
-
-	GetCapsuleComponent()->GetOverlappingActors(OUT Tiles);
-	UE_LOG(LogTemp, Warning, TEXT("Tile's num : %d"),Tiles.Num())
-	//int32 ShortestDistance;
-
-	for (auto Tile : Tiles)
-	{
-		/*int32 Distance = FVector::DotProduct(this->GetActorLocation(), Tile->GetActorLocation());
-		if (ShortestDistance > Distance)
-			ShortestDistance = Distance;*/
-		UE_LOG(LogTemp,Warning,TEXT("Tile before Casting : %s"),*Tile->GetName())
-	}
+	/**
+	* Get Collision Component
+	* Get Overlapping Tiles from collision 
+	* Get Shortest Distance between the tile's actor location of first data  and character's actor location
+	* Find the shortest distance and the tile of the shortest distance in loop
+	* Move to the tile of the shortest distance
+	*/
 }
 
 void AOperationIndigoCharacter::CollectGrids()

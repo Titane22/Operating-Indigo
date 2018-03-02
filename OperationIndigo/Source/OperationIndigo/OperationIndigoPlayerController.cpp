@@ -365,6 +365,7 @@ void AOperationIndigoPlayerController::RotateCamera()
 					if (EnemyAI)
 					{
 						PlayerController->SetTargetToAttack(AttackToTarget);
+						SelectedCharacter->ResetCollisionSphere();
 					}
 				}
 			}
