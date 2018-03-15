@@ -48,9 +48,9 @@ void ATile::SetObstacle()
 	TileState = ETileState::Obstacle;
 }
 
-void ATile::SetOnTheActor()
+void ATile::SetStepOn()
 {
-	TileState = ETileState::OnTheActor;
+	TileState = ETileState::StepOn;
 }
 
 void ATile::SetTracingMovable()
@@ -65,7 +65,8 @@ void ATile::SetTracingAttackable()
 
 bool ATile::isMovable()
 {
-	if (TileState == ETileState::Movable || TileState == ETileState::TracingMovable)
+	if (TileState == ETileState::Movable ||
+		TileState == ETileState::TracingMovable)
 	{
 		return true;
 	}
@@ -77,7 +78,8 @@ bool ATile::isMovable()
 
 bool ATile::isAttackable()
 {
-	if (TileState == ETileState::Attackable || TileState == ETileState::TracingAttackable)
+	if (TileState == ETileState::Attackable ||
+		TileState == ETileState::TracingAttackable)
 	{
 		return true;
 	}
@@ -87,9 +89,19 @@ bool ATile::isAttackable()
 	}
 }
 
-const ETileState ATile::GetTileState()
+ETileState ATile::GetTileState() const
 {
 	return TileState;
 }
 
+void ATile::SetFValue(int32 Value) { PathScoring.FValue = Value; }
 
+void ATile::SetGValue(int32 Value) { PathScoring.GValue = Value; }
+
+void ATile::SetHValue(int32 Value) { PathScoring.HValue = Value; }
+
+int32 ATile::GetFValue() const { return PathScoring.FValue; }
+
+int32 ATile::GetGValue() const { return PathScoring.GValue; }
+
+int32 ATile::GetHValue() const { return PathScoring.HValue; }

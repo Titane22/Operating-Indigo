@@ -82,8 +82,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add all character
 
-	TArray<ATile*> TilesInBattlePhase;
-
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	AOperationIndigoCharacter* SelectedCharacter = nullptr;
 
@@ -93,7 +91,6 @@ protected:
 	// Show Tile's Material according to Grid state.
 	void GridTracingControl();
 
-	// 
 	void EstimateTileState(ATile * TraceActor);
 private:
 	// Current tracing tile

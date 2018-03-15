@@ -74,15 +74,72 @@ void AOperationIndigoCharacter::InitCollisionSphere(USphereComponent* MovementTo
 
 void AOperationIndigoCharacter::MoveToShortestTile()
 {
-	TArray<AActor*> Tiles;
-	auto CapsuleComponent = GetCapsuleComponent();
 	/**
-	* Get Collision Component
+	* Get Collision Component 
 	* Get Overlapping Tiles from collision 
 	* Get Shortest Distance between the tile's actor location of first data  and character's actor location
 	* Find the shortest distance and the tile of the shortest distance in loop
 	* Move to the tile of the shortest distance
 	*/
+	TArray<AActor*> Tiles;
+	UCapsuleComponent* CapsuleComponent = nullptr;
+	
+	auto Components = GetComponents();
+	for (auto Component : Components)
+	{
+		if (Component->GetFName() == "Capsule")
+		{
+			CapsuleComponent = Cast<UCapsuleComponent>(Component);
+		}
+	}
+	
+	if (CapsuleComponent) 
+	{
+		CapsuleComponent->GetOverlappingActors(OUT Tiles);
+		float ShortestDist;
+		ATile* NearestTile = nullptr;
+
+		if (Tiles.Num() > 0)
+		{
+			for (auto Tile : Tiles)
+			{
+				if (!NearestTile)
+				{
+					NearestTile = Cast<ATile>(Tile);
+					FVector LocationDistance = GetActorLocation() - Tile->GetActorLocation();
+					ShortestDist = LocationDistance.Size();
+					//UE_LOG(LogTemp, Warning, TEXT("Distance : %lf"), DistanceLength)
+				}
+				else
+				{
+					auto CurrentTile = Cast<ATile>(Tile);
+					FVector LocationDistance = GetActorLocation() - CurrentTile->GetActorLocation();
+					float DistanceLength = LocationDistance.Size();
+					UE_LOG(LogTemp, Warning, TEXT("Distance : %lf"), DistanceLength)
+					if (ShortestDist > DistanceLength)
+					{
+						ShortestDist = DistanceLength;
+						NearestTile = CurrentTile;
+					}
+				}
+			}
+			// TODO : Change smoothly move performance
+			SetActorLocation(NearestTile->GetActorLocation());
+			NearestTile->SetStepOn();
+		}
+	}
+}
+
+void AOperationIndigoCharacter::SetTargetLocation(FVector Location)
+{
+	EndLocation=Location;
+	EndLocation.Z = GetActorLocation().Z;
+}
+
+void AOperationIndigoCharacter::Pathfinding(ATile * Target)
+{
+	TArray<AActor*> OpenList;
+	TArray<AActor*> ClosedList;
 }
 
 void AOperationIndigoCharacter::CollectGrids()
@@ -178,6 +235,7 @@ void AOperationIndigoCharacter::InitTurn()
 	ActionGauge = 0.f;
 	bCanAttack = false;
 	bCanMove = false;
+	EndLocation = FVector::FVector();
 }
 
 void AOperationIndigoCharacter::ReadyToStartTurn()
@@ -205,13 +263,13 @@ void AOperationIndigoCharacter::StartGauge()
 	bStopGauge = false;
 }
 
-void AOperationIndigoCharacter::MoveAction()
-{
-	if (bCanMove)
-	{
-		bCanMove = false;
-	}
-}
+//void AOperationIndigoCharacter::MoveAction()
+//{
+//	if (bCanMove)
+//	{
+//		bCanMove = false;
+//	}
+//}
 
 void AOperationIndigoCharacter::AttackAction()
 {

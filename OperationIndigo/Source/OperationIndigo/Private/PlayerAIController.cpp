@@ -80,7 +80,8 @@ void APlayerAIController::MoveToTile()
 {
 	if (bSetLocation)
 	{
-		ControlledCharacter->SetActorLocation(Location);
+		//ControlledCharacter->SetActorLocation(Location);
+		ControlledCharacter->SetTargetLocation(Location);
 		//MoveToLocation(Location, 0.f);
 		// TODO : True if the distance between the Character and Destination is the same
 		bMoved = true;

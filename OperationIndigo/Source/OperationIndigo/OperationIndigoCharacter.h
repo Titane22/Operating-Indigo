@@ -19,8 +19,8 @@ UCLASS(Blueprintable)
 class AOperationIndigoCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
 protected:
+	
 	// Gague Rise Per Seconds
 	float ActionGaugePer = 20.f;
 
@@ -49,10 +49,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "SetUp")
 	int32 AttackRange = 300;
 
+	/**Set Collision Sphere to shot movable range & attackable range*/
 	USphereComponent* MovementSphere = nullptr;
-
 	USphereComponent* AttackSphere = nullptr;
 
+	// Set the tiles in the game of battle phase
 	UPROPERTY(EditAnywhere,  BlueprintReadWrite, Category = "Grid")
 	TArray<ATile*> Grid;
 
@@ -63,12 +64,17 @@ protected:
 
 	/** Control Character State */
 	bool bCanAttack = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bCanMove = false;
-
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 	// virtual void BeginPlay() override;
 public:
+	UPROPERTY(BlueprintReadOnly,Category="Movement")
+	FVector EndLocation;
+	// Constructor
+	AOperationIndigoCharacter();
+
 	// Accessor function for Current HitPoint
 	UFUNCTION(BlueprintPure, Category = "Character")
 	float GetCurrentHitPoint() const;
@@ -85,8 +91,6 @@ public:
 	const bool isSelected();
 
 	const float GetSpeed();
-
-	AOperationIndigoCharacter();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Select")
 	void SetSelected();
@@ -110,6 +114,7 @@ public:
 	void StartGauge();
 
 	// Control Character's State about Movement
+	UFUNCTION(BlueprintImplementableEvent,Category="Movement")
 	void MoveAction();
 
 	// Control Character's State about Attack
@@ -129,5 +134,9 @@ public:
 
 	//When Game is activate the battle phase, move to the shortest tile
 	void MoveToShortestTile();
+
+	void SetTargetLocation(FVector Location);
+
+	void Pathfinding(ATile* Target);
 };
 

@@ -13,11 +13,21 @@ enum class ETileState : uint8
 	Attackable,
 	Obstacle,
 	Tracing,
-	OnTheActor,
+	StepOn,
 	TracingMovable,
 	TracingAttackable,
 	None
 	// Add a Tile state below the Enemy
+};
+
+USTRUCT()
+struct FPathScoring
+{
+	GENERATED_USTRUCT_BODY()
+
+	int32 FValue;
+	int32 GValue;
+	int32 HValue;
 };
 
 UCLASS()
@@ -46,18 +56,35 @@ public:
 
 	void SetObstacle();
 
-	void SetOnTheActor();
+	void SetStepOn();
 
 	void SetTracingMovable();
 
 	void SetTracingAttackable();
 
+	// Returns true or false.
 	bool isMovable();
-
+	// Returns true or false.
 	bool isAttackable();
 
+	// Returh this tile state
 	UFUNCTION(BlueprintCallable, Category="Grid")
-	const ETileState GetTileState();
+	ETileState GetTileState() const;
+
+	/// Set F,G,H values
+	void SetFValue(int32 Value);
+	void SetGValue(int32 Value);
+	void SetHValue(int32 Value);
+
+	/// Get F,G,H values
+	int32 GetFValue() const;
+	int32 GetGValue() const;
+	int32 GetHValue() const;
+
+
 private:
+	// Initialize None state
 	ETileState TileState = ETileState::None;
+
+	FPathScoring PathScoring;
 };
