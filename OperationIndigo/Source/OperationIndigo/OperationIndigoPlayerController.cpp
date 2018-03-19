@@ -334,6 +334,7 @@ void AOperationIndigoPlayerController::RotateCamera()
 					if (PlayerController)
 					{
 						PlayerController->SetDestination(MoveLocation);
+						SelectedCharacter->Pathfinding(DestinationTile);
 						SelectedCharacter->ResetCollisionSphere();
 					}
 				}

@@ -15,6 +15,7 @@
 #include "EngineMinimal.h"
 #include "Engine.h"
 
+#define TILE_SIZE 100
 
 AOperationIndigoCharacter::AOperationIndigoCharacter()
 {
@@ -83,7 +84,7 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 	*/
 	TArray<AActor*> Tiles;
 	UCapsuleComponent* CapsuleComponent = nullptr;
-	
+	// Get Capsule component from blueprint of character
 	auto Components = GetComponents();
 	for (auto Component : Components)
 	{
@@ -93,6 +94,7 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 		}
 	}
 	
+	// Get Overrlapping Tiles from Capsule
 	if (CapsuleComponent) 
 	{
 		CapsuleComponent->GetOverlappingActors(OUT Tiles);
@@ -103,6 +105,7 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 		{
 			for (auto Tile : Tiles)
 			{
+				// First Tile
 				if (!NearestTile)
 				{
 					NearestTile = Cast<ATile>(Tile);
@@ -115,7 +118,7 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 					auto CurrentTile = Cast<ATile>(Tile);
 					FVector LocationDistance = GetActorLocation() - CurrentTile->GetActorLocation();
 					float DistanceLength = LocationDistance.Size();
-					UE_LOG(LogTemp, Warning, TEXT("Distance : %lf"), DistanceLength)
+
 					if (ShortestDist > DistanceLength)
 					{
 						ShortestDist = DistanceLength;
@@ -124,8 +127,8 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 				}
 			}
 			// TODO : Change smoothly move performance
+			// Move action
 			SetActorLocation(NearestTile->GetActorLocation());
-			NearestTile->SetStepOn();
 		}
 	}
 }
@@ -138,8 +141,64 @@ void AOperationIndigoCharacter::SetTargetLocation(FVector Location)
 
 void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 {
+	/** 4 Direction Pathfinding
+	*	Get F,G,H Value in movable tiles to target
+	*	
+	*/
 	TArray<AActor*> OpenList;
 	TArray<AActor*> ClosedList;
+
+	/// Get F,G,H Value
+	// Get Capsule Component from blueprint of Character
+	UCapsuleComponent* Capsule = nullptr;
+	auto Components = GetComponents();
+
+	for (auto Component : Components)
+	{
+		if (Component->GetFName() == "Capsule")
+		{
+			Capsule = Cast<UCapsuleComponent>(Component);
+		}
+	}
+	if (Capsule)
+	{
+		TArray<AActor*> Tiles;
+
+		Capsule->GetOverlappingActors(OUT Tiles);
+		ATile* CurrentTile = Cast<ATile>(Tiles[0]);
+		if (CurrentTile)
+		{
+			/** Get 4 direction from tiles under the character
+			*	Get H Value
+			*	Start (X0, Y0)
+			*	Target (X, Y)
+			*	H Value = | (X-X0) + (Y-Y0) | * 10
+			*/
+			float CurrentPosX=CurrentTile->GetActorLocation().X, CurrentPosY= CurrentTile->GetActorLocation().Y;
+
+			for (auto Tile : Grid)
+			{
+				if (Tile->GetTileState() == ETileState::Movable &&
+						(
+						/**UP*/(Tile->GetActorLocation().X==CurrentPosX && Tile->GetActorLocation().Y == CurrentPosY-TILE_SIZE) ||
+						/**LEFT*/(Tile->GetActorLocation().X == CurrentPosX - TILE_SIZE && Tile->GetActorLocation().Y == CurrentPosY) ||
+						/**RIGHT*/(Tile->GetActorLocation().X == CurrentPosX + TILE_SIZE && Tile->GetActorLocation().Y == CurrentPosY)||
+						/**DOWN*/(Tile->GetActorLocation().X == CurrentPosX && Tile->GetActorLocation().Y == CurrentPosY + TILE_SIZE)
+						)
+					)
+				{
+					// Find Count X, Y from Tile location to target location
+					auto DistanceCount = Target->GetActorLocation() - Tile->GetActorLocation();
+					UE_LOG(LogTemp, Warning, TEXT("CountX : %d , CountY : %d"),(int32)DistanceCount.X,(int32)DistanceCount.Y )
+					int32 CountSum = (FMath::Abs((int32)DistanceCount.X / 100) + FMath::Abs((int32)DistanceCount.Y / 100)) * 10;
+					UE_LOG(LogTemp, Warning, TEXT("H Value = | (X-X0) + (Y-Y0) | * 10 = %d"), CountSum)
+					// Tile->SetHValue((CountX + CountY) * 10);
+				}
+			}
+
+		}
+	}
+	
 }
 
 void AOperationIndigoCharacter::CollectGrids()
