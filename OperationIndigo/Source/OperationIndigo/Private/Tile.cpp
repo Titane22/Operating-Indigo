@@ -48,11 +48,6 @@ void ATile::SetObstacle()
 	TileState = ETileState::Obstacle;
 }
 
-void ATile::SetStepOn()
-{
-	TileState = ETileState::StepOn;
-}
-
 void ATile::SetTracingMovable()
 {
 	TileState = ETileState::TracingMovable;
@@ -61,6 +56,11 @@ void ATile::SetTracingMovable()
 void ATile::SetTracingAttackable()
 {
 	TileState = ETileState::TracingAttackable;
+}
+
+void ATile::SetPath()
+{
+	TileState = ETileState::Path;
 }
 
 bool ATile::isMovable()

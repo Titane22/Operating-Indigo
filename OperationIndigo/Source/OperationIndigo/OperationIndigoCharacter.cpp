@@ -170,10 +170,8 @@ void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 		
 		if (StartPointTile)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Target Tile : %s"), *Target->GetName())
 			// Add CurrentTile to OpenList
 			OpenList.Add(StartPointTile);
-			/// Loop
 			while(OpenList.Num()>0)
 			{
 				ATile* CurrentTile = nullptr;
@@ -191,7 +189,7 @@ void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 
 				OpenList.Remove(CurrentTile);
 				ClosedList.Add(CurrentTile);
-				// UE_LOG(LogTemp, Warning, TEXT("Current Tile : %s"), *CurrentTile->GetName())
+				// if the current tile and the target are the same, set the bIsCompleted true
 				if (CurrentTile == Target)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Completed"))
@@ -235,7 +233,7 @@ void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 							// Set G Cost
 							Tile->SetGCost(CurrentTile->GetGCost() + 10);
 							Tile->SetFCost(Tile->GetGCost() + HCost);
-							// UE_LOG(LogTemp, Warning, TEXT("%s FCost %d = G Cost %d + H Cost %d "),*Tile->GetName(), Tile->GetFCost(), Tile->GetGCost(), Tile->GetHCost())
+
 							Tile->SetParrentTile(CurrentTile);
 
 							OpenList.Add(Tile);
@@ -253,8 +251,7 @@ void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 					}
 				}
 			}
-			
-			/// End loop
+			// if the current tile and the target are the same
 			if (bIsCompleted)
 			{
 				TArray<ATile*> CompletedList;
@@ -263,34 +260,22 @@ void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 				// Backtracking Parrent tile in ClosedList
 				CompletedList.Add(LastElem);
 
+				// Insert elements from ClosedList to CompletedList as the parrent tile
 				for(int32 i=ClosedList.Num()-2;i>=0;i--)
 				{
 					LastElem = ParrentTile;
 					ParrentTile = LastElem->GetParrentTile();
-					UE_LOG(LogTemp, Warning, TEXT("ClosedList NUM - 1's Elem: %s"), *LastElem->GetName())
-						//UE_LOG(LogTemp, Warning, TEXT("ClosedList NUM - 1's Parrent: %s"), *ParrentTile->GetName())
-
 					CompletedList.Add(LastElem);
 				}
 
+				// Reverse CompletedList
 				for (int32 i=CompletedList.Num()-1;i> (CompletedList.Num() - 1)/2;i--)
 				{
 					ATile* TempTile = CompletedList[CompletedList.Num() - 1 - i];
 					CompletedList[CompletedList.Num() - 1 - i] = CompletedList[i];
 					CompletedList[i] = TempTile;
-
-					UE_LOG(LogTemp, Warning, TEXT("First : %d, Last : %d"), CompletedList.Num()-1-i,i)
-				}
-
-				
-				UE_LOG(LogTemp, Warning, TEXT("CompletedList NUM : %d"), CompletedList.Num())
-				for (auto Tile : CompletedList)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("CompletedList Element : %s"), *Tile->GetName())
 				}
 			}
-			UE_LOG(LogTemp, Warning, TEXT("OpenList NUM : %d"), OpenList.Num())
-			UE_LOG(LogTemp, Warning, TEXT("ClosedList NUM : %d"), ClosedList.Num())
 		}
 	}
 	

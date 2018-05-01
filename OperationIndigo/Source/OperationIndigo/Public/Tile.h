@@ -13,11 +13,10 @@ enum class ETileState : uint8
 	Attackable,
 	Obstacle,
 	Tracing,
-	StepOn,
 	TracingMovable,
 	TracingAttackable,
+	Path,
 	None
-	// Add a Tile state below the Enemy
 };
 
 USTRUCT()
@@ -62,6 +61,8 @@ public:
 	void SetTracingMovable();
 
 	void SetTracingAttackable();
+
+	void SetPath();
 
 	// Returns true or false.
 	bool isMovable();
