@@ -86,7 +86,7 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 	UCapsuleComponent* CapsuleComponent = nullptr;
 	// Get Capsule component from blueprint of character
 	auto Components = GetComponents();
-	for (auto Component : Components)
+	for (const auto Component : Components)
 	{
 		if (Component->GetFName() == "Capsule")
 		{
@@ -103,7 +103,7 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 
 		if (Tiles.Num() > 0)
 		{
-			for (auto Tile : Tiles)
+			for (const auto Tile : Tiles)
 			{
 				// First Tile
 				if (!NearestTile)
@@ -111,7 +111,6 @@ void AOperationIndigoCharacter::MoveToShortestTile()
 					NearestTile = Cast<ATile>(Tile);
 					FVector LocationDistance = GetActorLocation() - Tile->GetActorLocation();
 					ShortestDist = LocationDistance.Size();
-					//UE_LOG(LogTemp, Warning, TEXT("Distance : %lf"), DistanceLength)
 				}
 				else
 				{
@@ -139,21 +138,20 @@ void AOperationIndigoCharacter::SetTargetLocation(FVector Location)
 	EndLocation.Z = GetActorLocation().Z;
 }
 
+
+// TODO : Apply when Player is tracing tile
 void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 {
 	/** 4 Direction Pathfinding
 	*	Get F,G,H Value in movable tiles to target
-	*	
 	*/
-	TArray<AActor*> OpenList;
-	TArray<AActor*> ClosedList;
-
+	
 	/// Get F,G,H Value
 	// Get Capsule Component from blueprint of Character
 	UCapsuleComponent* Capsule = nullptr;
 	auto Components = GetComponents();
 
-	for (auto Component : Components)
+	for (const auto Component : Components)
 	{
 		if (Component->GetFName() == "Capsule")
 		{
@@ -163,42 +161,163 @@ void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 	if (Capsule)
 	{
 		TArray<AActor*> Tiles;
+		TArray<ATile*> OpenList;
+		TArray<ATile*> ClosedList;
+		bool bIsCompleted = false;
 
 		Capsule->GetOverlappingActors(OUT Tiles);
-		ATile* CurrentTile = Cast<ATile>(Tiles[0]);
-		if (CurrentTile)
+		ATile* StartPointTile = Cast<ATile>(Tiles[0]);
+		
+		if (StartPointTile)
 		{
-			/** Get 4 direction from tiles under the character
-			*	Get H Value
-			*	Start (X0, Y0)
-			*	Target (X, Y)
-			*	H Value = | (X-X0) + (Y-Y0) | * 10
-			*/
-			float CurrentPosX=CurrentTile->GetActorLocation().X, CurrentPosY= CurrentTile->GetActorLocation().Y;
-
-			for (auto Tile : Grid)
+			UE_LOG(LogTemp, Warning, TEXT("Target Tile : %s"), *Target->GetName())
+			// Add CurrentTile to OpenList
+			OpenList.Add(StartPointTile);
+			/// Loop
+			while(OpenList.Num()>0)
 			{
-				if (Tile->GetTileState() == ETileState::Movable &&
-						(
-						/**UP*/(Tile->GetActorLocation().X==CurrentPosX && Tile->GetActorLocation().Y == CurrentPosY-TILE_SIZE) ||
-						/**LEFT*/(Tile->GetActorLocation().X == CurrentPosX - TILE_SIZE && Tile->GetActorLocation().Y == CurrentPosY) ||
-						/**RIGHT*/(Tile->GetActorLocation().X == CurrentPosX + TILE_SIZE && Tile->GetActorLocation().Y == CurrentPosY)||
-						/**DOWN*/(Tile->GetActorLocation().X == CurrentPosX && Tile->GetActorLocation().Y == CurrentPosY + TILE_SIZE)
-						)
-					)
+				ATile* CurrentTile = nullptr;
+
+				// Find the lowest F Cost in OpenList and Select it as the Current Tile 
+				for (auto Tile : OpenList)
 				{
-					// Find Count X, Y from Tile location to target location
-					auto DistanceCount = Target->GetActorLocation() - Tile->GetActorLocation();
-					UE_LOG(LogTemp, Warning, TEXT("CountX : %d , CountY : %d"),(int32)DistanceCount.X,(int32)DistanceCount.Y )
-					int32 CountSum = (FMath::Abs((int32)DistanceCount.X / 100) + FMath::Abs((int32)DistanceCount.Y / 100)) * 10;
-					UE_LOG(LogTemp, Warning, TEXT("H Value = | (X-X0) + (Y-Y0) | * 10 = %d"), CountSum)
-					// Tile->SetHValue((CountX + CountY) * 10);
+					if (
+						!CurrentTile ||
+						(CurrentTile->GetFCost() > Tile->GetFCost() ||
+						(CurrentTile->GetFCost() == Tile->GetFCost() && CurrentTile->GetHCost() > Tile->GetHCost()))
+						)
+						CurrentTile = Tile;
+				}
+
+				OpenList.Remove(CurrentTile);
+				ClosedList.Add(CurrentTile);
+				// UE_LOG(LogTemp, Warning, TEXT("Current Tile : %s"), *CurrentTile->GetName())
+				if (CurrentTile == Target)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Completed"))
+					bIsCompleted = true;
+					break;
+				}
+
+				TArray<ATile*> Neighbours = GetNeighbourTile(CurrentTile);
+				for (auto Tile : Neighbours)
+				{
+					bool bIsContainedInClosedList = false;
+					for (auto ElementTile : ClosedList)
+					{
+						// Check that it is not in the closed list.
+						if (Tile == ElementTile)
+						{
+							bIsContainedInClosedList = true;
+							break;
+						}
+					}
+					// This Tile is NOT contained in ClosedList
+					if (!bIsContainedInClosedList)
+					{
+						bool bIsContainedInOpenList = false;
+						for (auto ElementTile : OpenList)
+						{
+							if (Tile == ElementTile)
+							{
+								bIsContainedInOpenList = true;
+								break;
+							}
+						}
+						// This Tile is NOT contained in OpenList
+						if (!bIsContainedInOpenList)
+						{
+							float CurrentPosX = CurrentTile->GetActorLocation().X, CurrentPosY = CurrentTile->GetActorLocation().Y;
+							auto DistanceCount = Target->GetActorLocation() - Tile->GetActorLocation();
+							int32 HCost = (FMath::Abs((int32)DistanceCount.X / 100) + FMath::Abs((int32)DistanceCount.Y / 100)) * 10;
+
+							Tile->SetHCost(HCost);
+							// Set G Cost
+							Tile->SetGCost(CurrentTile->GetGCost() + 10);
+							Tile->SetFCost(Tile->GetGCost() + HCost);
+							// UE_LOG(LogTemp, Warning, TEXT("%s FCost %d = G Cost %d + H Cost %d "),*Tile->GetName(), Tile->GetFCost(), Tile->GetGCost(), Tile->GetHCost())
+							Tile->SetParrentTile(CurrentTile);
+
+							OpenList.Add(Tile);
+						}
+						// is Contained in OpenList
+						else
+						{
+							if (Tile->GetGCost() > CurrentTile->GetGCost())
+							{
+								Tile->SetGCost(CurrentTile->GetGCost() + 10);
+								Tile->SetFCost(Tile->GetGCost() + Tile->GetHCost());
+								Tile->SetParrentTile(CurrentTile);
+							}
+						}
+					}
 				}
 			}
+			
+			/// End loop
+			if (bIsCompleted)
+			{
+				TArray<ATile*> CompletedList;
+				ATile* LastElem = ClosedList[ClosedList.Num() - 1];
+				ATile* ParrentTile = LastElem->GetParrentTile();
+				// Backtracking Parrent tile in ClosedList
+				CompletedList.Add(LastElem);
 
+				for(int32 i=ClosedList.Num()-2;i>=0;i--)
+				{
+					LastElem = ParrentTile;
+					ParrentTile = LastElem->GetParrentTile();
+					UE_LOG(LogTemp, Warning, TEXT("ClosedList NUM - 1's Elem: %s"), *LastElem->GetName())
+						//UE_LOG(LogTemp, Warning, TEXT("ClosedList NUM - 1's Parrent: %s"), *ParrentTile->GetName())
+
+					CompletedList.Add(LastElem);
+				}
+
+				for (int32 i=CompletedList.Num()-1;i> (CompletedList.Num() - 1)/2;i--)
+				{
+					ATile* TempTile = CompletedList[CompletedList.Num() - 1 - i];
+					CompletedList[CompletedList.Num() - 1 - i] = CompletedList[i];
+					CompletedList[i] = TempTile;
+
+					UE_LOG(LogTemp, Warning, TEXT("First : %d, Last : %d"), CompletedList.Num()-1-i,i)
+				}
+
+				
+				UE_LOG(LogTemp, Warning, TEXT("CompletedList NUM : %d"), CompletedList.Num())
+				for (auto Tile : CompletedList)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("CompletedList Element : %s"), *Tile->GetName())
+				}
+			}
+			UE_LOG(LogTemp, Warning, TEXT("OpenList NUM : %d"), OpenList.Num())
+			UE_LOG(LogTemp, Warning, TEXT("ClosedList NUM : %d"), ClosedList.Num())
 		}
 	}
 	
+}
+
+TArray<ATile*> AOperationIndigoCharacter::GetNeighbourTile(ATile * CurrentTile)
+{
+	TArray<ATile*> Neighbours;
+
+	float CurrentPosX = CurrentTile->GetActorLocation().X, CurrentPosY = CurrentTile->GetActorLocation().Y;
+
+	for (auto Tile : Grid)
+	{
+		if ((Tile->GetTileState() == ETileState::Movable || Tile->GetTileState() == ETileState::TracingMovable) &&
+			(
+			/**UP*/(Tile->GetActorLocation().X == CurrentPosX && Tile->GetActorLocation().Y == CurrentPosY - TILE_SIZE) ||
+				/**LEFT*/(Tile->GetActorLocation().X == CurrentPosX - TILE_SIZE && Tile->GetActorLocation().Y == CurrentPosY) ||
+				/**RIGHT*/(Tile->GetActorLocation().X == CurrentPosX + TILE_SIZE && Tile->GetActorLocation().Y == CurrentPosY) ||
+				/**DOWN*/(Tile->GetActorLocation().X == CurrentPosX && Tile->GetActorLocation().Y == CurrentPosY + TILE_SIZE)
+				)
+			)
+		{
+			Neighbours.Add(Tile);
+		}
+	}
+
+	return Neighbours;
 }
 
 void AOperationIndigoCharacter::CollectGrids()
@@ -221,7 +340,6 @@ void AOperationIndigoCharacter::CollectGrids()
 					Grid.Add(TileToSet);
 				}
 			}
-
 			AttackSphere->SetSphereRadius(MovementRange + AttackRange);
 			AttackSphere->GetOverlappingActors(OUT Tiles);
 

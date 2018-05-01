@@ -76,9 +76,6 @@ protected:
 	// Bool for stopping the gauge
 	bool bStopGauge = false;
 
-	// Main Camera
-	APawn* PlayerCamera=nullptr;
-
 	UPROPERTY(BlueprintReadOnly, Category = "SetUp")
 	TArray<AOperationIndigoCharacter*> UnitsInBattlePhase; // TODO : if bBattlePhase is false, then add all character
 

@@ -25,9 +25,10 @@ struct FPathScoring
 {
 	GENERATED_USTRUCT_BODY()
 
-	int32 FValue;
-	int32 GValue;
-	int32 HValue;
+	int32 FCost=0;
+	int32 GCost=0;
+	int32 HCost=0;
+	class ATile* Parrent = nullptr;
 };
 
 UCLASS()
@@ -72,15 +73,16 @@ public:
 	ETileState GetTileState() const;
 
 	/// Set F,G,H values
-	void SetFValue(int32 Value);
-	void SetGValue(int32 Value);
-	void SetHValue(int32 Value);
+	void SetFCost(int32 Value);
+	void SetGCost(int32 Value);
+	void SetHCost(int32 Value);
+	void SetParrentTile(ATile* Parrent);
 
 	/// Get F,G,H values
-	int32 GetFValue() const;
-	int32 GetGValue() const;
-	int32 GetHValue() const;
-
+	int32 GetFCost() const;
+	int32 GetGCost() const;
+	int32 GetHCost() const;
+	ATile* GetParrentTile() const;
 
 private:
 	// Initialize None state

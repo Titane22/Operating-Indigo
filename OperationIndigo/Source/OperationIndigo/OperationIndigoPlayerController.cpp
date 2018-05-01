@@ -51,7 +51,7 @@ void AOperationIndigoPlayerController::PlayerTick(float DeltaTime)
 						AIController->bStartTurn = true;
 					}
 					// Move Camera to Activated character
-					PlayerCamera = GetPawn();
+					auto PlayerCamera = GetPawn();
 					auto MoveToLocation = Unit->GetActorLocation();
 					MoveToLocation.Z = PlayerCamera->GetActorLocation().Z;
 					PlayerCamera->SetActorLocation(MoveToLocation);

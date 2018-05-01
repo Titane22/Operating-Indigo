@@ -138,5 +138,7 @@ public:
 	void SetTargetLocation(FVector Location);
 
 	void Pathfinding(ATile* Target);
+
+	TArray<ATile*> GetNeighbourTile(ATile* CurrentTile);
 };
 

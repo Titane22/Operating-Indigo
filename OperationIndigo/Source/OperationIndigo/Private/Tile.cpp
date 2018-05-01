@@ -94,14 +94,18 @@ ETileState ATile::GetTileState() const
 	return TileState;
 }
 
-void ATile::SetFValue(int32 Value) { PathScoring.FValue = Value; }
+void ATile::SetFCost(int32 Value) { PathScoring.FCost = Value; }
 
-void ATile::SetGValue(int32 Value) { PathScoring.GValue = Value; }
+void ATile::SetGCost(int32 Value) { PathScoring.GCost = Value; }
 
-void ATile::SetHValue(int32 Value) { PathScoring.HValue = Value; }
+void ATile::SetHCost(int32 Value) { PathScoring.HCost = Value; }
 
-int32 ATile::GetFValue() const { return PathScoring.FValue; }
+void ATile::SetParrentTile(ATile * Parrent) { PathScoring.Parrent = Parrent; }
 
-int32 ATile::GetGValue() const { return PathScoring.GValue; }
+int32 ATile::GetFCost() const { return PathScoring.FCost; }
 
-int32 ATile::GetHValue() const { return PathScoring.HValue; }
+int32 ATile::GetGCost() const { return PathScoring.GCost; }
+
+int32 ATile::GetHCost() const { return PathScoring.HCost; }
+
+ATile * ATile::GetParrentTile() const { return PathScoring.Parrent; }
