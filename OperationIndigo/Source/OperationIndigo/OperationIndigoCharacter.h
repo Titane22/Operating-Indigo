@@ -137,7 +137,7 @@ public:
 
 	void SetTargetLocation(FVector Location);
 
-	void Pathfinding(ATile* Target);
+	UCapsuleComponent * GetCapsule();
 
 	TArray<ATile*> GetNeighbourTile(ATile* CurrentTile);
 };

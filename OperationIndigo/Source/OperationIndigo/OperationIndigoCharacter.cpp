@@ -138,16 +138,8 @@ void AOperationIndigoCharacter::SetTargetLocation(FVector Location)
 	EndLocation.Z = GetActorLocation().Z;
 }
 
-
-// TODO : Apply when Player is tracing tile
-void AOperationIndigoCharacter::Pathfinding(ATile * Target)
+UCapsuleComponent* AOperationIndigoCharacter::GetCapsule()
 {
-	/** 4 Direction Pathfinding
-	*	Get F,G,H Value in movable tiles to target
-	*/
-	
-	/// Get F,G,H Value
-	// Get Capsule Component from blueprint of Character
 	UCapsuleComponent* Capsule = nullptr;
 	auto Components = GetComponents();
 
@@ -158,128 +150,9 @@ void AOperationIndigoCharacter::Pathfinding(ATile * Target)
 			Capsule = Cast<UCapsuleComponent>(Component);
 		}
 	}
-	if (Capsule)
-	{
-		TArray<AActor*> Tiles;
-		TArray<ATile*> OpenList;
-		TArray<ATile*> ClosedList;
-		bool bIsCompleted = false;
-
-		Capsule->GetOverlappingActors(OUT Tiles);
-		ATile* StartPointTile = Cast<ATile>(Tiles[0]);
-		
-		if (StartPointTile)
-		{
-			// Add CurrentTile to OpenList
-			OpenList.Add(StartPointTile);
-			while(OpenList.Num()>0)
-			{
-				ATile* CurrentTile = nullptr;
-
-				// Find the lowest F Cost in OpenList and Select it as the Current Tile 
-				for (auto Tile : OpenList)
-				{
-					if (
-						!CurrentTile ||
-						(CurrentTile->GetFCost() > Tile->GetFCost() ||
-						(CurrentTile->GetFCost() == Tile->GetFCost() && CurrentTile->GetHCost() > Tile->GetHCost()))
-						)
-						CurrentTile = Tile;
-				}
-
-				OpenList.Remove(CurrentTile);
-				ClosedList.Add(CurrentTile);
-				// if the current tile and the target are the same, set the bIsCompleted true
-				if (CurrentTile == Target)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Completed"))
-					bIsCompleted = true;
-					break;
-				}
-
-				TArray<ATile*> Neighbours = GetNeighbourTile(CurrentTile);
-				for (auto Tile : Neighbours)
-				{
-					bool bIsContainedInClosedList = false;
-					for (auto ElementTile : ClosedList)
-					{
-						// Check that it is not in the closed list.
-						if (Tile == ElementTile)
-						{
-							bIsContainedInClosedList = true;
-							break;
-						}
-					}
-					// This Tile is NOT contained in ClosedList
-					if (!bIsContainedInClosedList)
-					{
-						bool bIsContainedInOpenList = false;
-						for (auto ElementTile : OpenList)
-						{
-							if (Tile == ElementTile)
-							{
-								bIsContainedInOpenList = true;
-								break;
-							}
-						}
-						// This Tile is NOT contained in OpenList
-						if (!bIsContainedInOpenList)
-						{
-							float CurrentPosX = CurrentTile->GetActorLocation().X, CurrentPosY = CurrentTile->GetActorLocation().Y;
-							auto DistanceCount = Target->GetActorLocation() - Tile->GetActorLocation();
-							int32 HCost = (FMath::Abs((int32)DistanceCount.X / 100) + FMath::Abs((int32)DistanceCount.Y / 100)) * 10;
-
-							Tile->SetHCost(HCost);
-							// Set G Cost
-							Tile->SetGCost(CurrentTile->GetGCost() + 10);
-							Tile->SetFCost(Tile->GetGCost() + HCost);
-
-							Tile->SetParrentTile(CurrentTile);
-
-							OpenList.Add(Tile);
-						}
-						// is Contained in OpenList
-						else
-						{
-							if (Tile->GetGCost() > CurrentTile->GetGCost())
-							{
-								Tile->SetGCost(CurrentTile->GetGCost() + 10);
-								Tile->SetFCost(Tile->GetGCost() + Tile->GetHCost());
-								Tile->SetParrentTile(CurrentTile);
-							}
-						}
-					}
-				}
-			}
-			// if the current tile and the target are the same
-			if (bIsCompleted)
-			{
-				TArray<ATile*> CompletedList;
-				ATile* LastElem = ClosedList[ClosedList.Num() - 1];
-				ATile* ParrentTile = LastElem->GetParrentTile();
-				// Backtracking Parrent tile in ClosedList
-				CompletedList.Add(LastElem);
-
-				// Insert elements from ClosedList to CompletedList as the parrent tile
-				for(int32 i=ClosedList.Num()-2;i>=0;i--)
-				{
-					LastElem = ParrentTile;
-					ParrentTile = LastElem->GetParrentTile();
-					CompletedList.Add(LastElem);
-				}
-
-				// Reverse CompletedList
-				for (int32 i=CompletedList.Num()-1;i> (CompletedList.Num() - 1)/2;i--)
-				{
-					ATile* TempTile = CompletedList[CompletedList.Num() - 1 - i];
-					CompletedList[CompletedList.Num() - 1 - i] = CompletedList[i];
-					CompletedList[i] = TempTile;
-				}
-			}
-		}
-	}
-	
+	return Capsule;
 }
+
 
 TArray<ATile*> AOperationIndigoCharacter::GetNeighbourTile(ATile * CurrentTile)
 {

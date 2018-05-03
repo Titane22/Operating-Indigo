@@ -89,9 +89,11 @@ protected:
 	void GridTracingControl();
 
 	void EstimateTileState(ATile * TraceActor);
+
+	TArray<ATile*> PathTile;
+
+	void Pathfinding(AOperationIndigoCharacter* SelectedCharacter,ATile* Target,TArray<ATile*>& PathTile);
 private:
 	// Current tracing tile
 	ATile* TracingTile=nullptr;
 };
-
-
