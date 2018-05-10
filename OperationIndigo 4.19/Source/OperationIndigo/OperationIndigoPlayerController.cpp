@@ -130,7 +130,7 @@ void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
 					auto Controller = SelectedCharacter->GetController();
 					if (Controller)
 					{
-						UE_LOG(LogTemp,Warning,TEXT("Trace Actor : %s"),*TraceActor->GetName())
+						//UE_LOG(LogTemp,Warning,TEXT("Trace Actor : %s"),*TraceActor->GetName())
 						// Reset previous PathTile's Material of Path State
 						for (auto Tile : PathTile)
 						{
@@ -139,7 +139,7 @@ void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
 						}
 						Pathfinding(SelectedCharacter, TraceActor, PathTile);
 
-						UE_LOG(LogTemp, Warning, TEXT("Path : %d"),PathTile.Num())
+						//UE_LOG(LogTemp, Warning, TEXT("Path : %d"),PathTile.Num())
 						// Set the Material of Path State 
 						for (auto Tile : PathTile)
 						{
@@ -147,7 +147,7 @@ void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
 						}
 					}
 				}
-				else if(PathTile.Num()>0)
+				else if(PathTile.Num()>0 && !(TraceActor->GetTileState() == ETileState::Movable))
 				{
 					auto Controller = SelectedCharacter->GetController();
 					if (Controller)
@@ -296,16 +296,13 @@ void AOperationIndigoPlayerController::Pathfinding(AOperationIndigoCharacter* Se
 	/// Get F,G,H Value
 	// Get Capsule Component from blueprint of Character
 	// TODO : Why can apply 'const' to AOperationIndigoCharacter*?
-	UCapsuleComponent* Capsule = SelectedCharacter->GetCapsule();
-	if (Capsule)
+	ATile* StartPointTile = SelectedCharacter->GetStartPointTile();
+	if (StartPointTile)
 	{
-		TArray<AActor*> Tiles;
 		TArray<ATile*> OpenList;
 		TArray<ATile*> ClosedList;
 		bool bIsCompleted = false;
 
-		Capsule->GetOverlappingActors(OUT Tiles);
-		ATile* StartPointTile = Cast<ATile>(Tiles[0]);
 
 		if (StartPointTile)
 		{
@@ -439,7 +436,7 @@ void AOperationIndigoPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("Selection", IE_Pressed, this, &AOperationIndigoPlayerController::SelectionPressed);
 
-	InputComponent->BindAction("RotateCamera", IE_Pressed, this, &AOperationIndigoPlayerController::RotateCamera);
+	InputComponent->BindAction("RotateCamera", IE_Pressed, this, &AOperationIndigoPlayerController::RightMouseButton);
 	InputComponent->BindAction("RotateCamera", IE_Released, this, &AOperationIndigoPlayerController::BranchReleased);
 }
 
@@ -508,7 +505,7 @@ AOperationIndigoCharacter* AOperationIndigoPlayerController::GetActivatedCharact
 	else return nullptr;
 }
 
-void AOperationIndigoPlayerController::RotateCamera()
+void AOperationIndigoPlayerController::RightMouseButton()
 {
 	// Rotate the camera when Nobody is selected.
 	if (!SelectedCharacter|| AIController)
@@ -537,12 +534,52 @@ void AOperationIndigoPlayerController::RotateCamera()
 				if (DestinationTile->isMovable())
 				{
 					TracingTile = nullptr;
-					auto MoveLocation = DestinationTile->GetActorLocation();
-					if (PlayerController)
+					//auto MoveLocation = DestinationTile->GetActorLocation();
+					if (PlayerController && PathTile.Num()>0)
 					{
-						PlayerController->SetDestination(MoveLocation);
-						// SelectedCharacter->Pathfinding(DestinationTile);
-						SelectedCharacter->ResetCollisionSphere();
+						auto StartPointTile = SelectedCharacter->GetStartPointTile();
+						TArray<ATile*> MovePath;
+						if (StartPointTile)
+						{
+							ATile* CurrentTile = StartPointTile;
+							FVector StartDirection = SelectedCharacter->GetActorForwardVector();
+							UE_LOG(LogTemp, Warning, TEXT("Start Direction : %lf , %lf , %lf"), StartDirection.X, StartDirection.Y, StartDirection.Z);
+							for (auto Tile : PathTile)
+							{
+								if (Tile != StartPointTile)
+								{
+									auto StartLocation = CurrentTile->GetActorLocation();
+									auto MoveLocation = Tile->GetActorLocation();
+									auto RelativeLocation = MoveLocation - StartLocation;
+									auto VectorLength = FMath::Sqrt(FVector::DotProduct(RelativeLocation, RelativeLocation));
+									auto Direction = RelativeLocation / VectorLength;
+									/*UE_LOG(LogTemp, Warning, TEXT("Start Location : %lf ,  %lf,  %lf"), StartLocation.X, StartLocation.Y, StartLocation.Z);
+									UE_LOG(LogTemp, Warning, TEXT("Move Location : %lf ,  %lf,  %lf"), MoveLocation.X, MoveLocation.Y, MoveLocation.Z);
+									UE_LOG(LogTemp, Warning, TEXT("Relative Location : %lf ,  %lf,  %lf"), RelativeLocation.X, RelativeLocation.Y, RelativeLocation.Z);
+									UE_LOG(LogTemp, Warning, TEXT("Vector Length : %lf"), VectorLength);
+									UE_LOG(LogTemp, Warning, TEXT("Direction : %lf ,  %lf,  %lf"), Direction.X, Direction.Y, Direction.Z);*/
+									
+									if (StartDirection != Direction)
+									{
+										StartDirection = Direction;
+										MovePath.Add(CurrentTile);
+										UE_LOG(LogTemp,Warning,TEXT("Current Tile : %s"),*CurrentTile->GetName())
+									}
+									else if (Tile == DestinationTile)
+									{
+										MovePath.Add(Tile);
+									}
+									CurrentTile = Tile;
+								}
+							}
+							if (MovePath.Num() > 0)
+							{
+								PlayerController->SetDestination(MovePath);
+							}
+							// SelectedCharacter->Pathfinding(DestinationTile);
+							SelectedCharacter->ResetCollisionSphere();
+						}
+						
 					}
 				}
 

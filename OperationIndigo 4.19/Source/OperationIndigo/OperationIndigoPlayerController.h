@@ -56,7 +56,7 @@ protected:
 	void SelectionPressed();
 
 	// Right Mouse Button Pressed
-	void RotateCamera();
+	void RightMouseButton();
 
 	// Right Mouse button Released
 	void BranchReleased();

@@ -138,7 +138,7 @@ void AOperationIndigoCharacter::SetTargetLocation(FVector Location)
 	EndLocation.Z = GetActorLocation().Z;
 }
 
-UCapsuleComponent* AOperationIndigoCharacter::GetCapsule()
+ATile* AOperationIndigoCharacter::GetStartPointTile()
 {
 	UCapsuleComponent* Capsule = nullptr;
 	auto Components = GetComponents();
@@ -150,7 +150,17 @@ UCapsuleComponent* AOperationIndigoCharacter::GetCapsule()
 			Capsule = Cast<UCapsuleComponent>(Component);
 		}
 	}
-	return Capsule;
+	if (Capsule)
+	{
+		TArray<AActor*> Tiles;
+		Capsule->GetOverlappingActors(OUT Tiles);
+		ATile* StartPointTile = Cast<ATile>(Tiles[0]);
+		return StartPointTile;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 

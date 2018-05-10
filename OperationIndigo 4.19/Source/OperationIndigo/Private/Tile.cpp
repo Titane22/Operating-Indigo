@@ -66,7 +66,8 @@ void ATile::SetPath()
 bool ATile::isMovable()
 {
 	if (TileState == ETileState::Movable ||
-		TileState == ETileState::TracingMovable)
+		TileState == ETileState::TracingMovable ||
+		TileState == ETileState::Path)
 	{
 		return true;
 	}

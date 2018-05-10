@@ -11,6 +11,7 @@
  */
 
 class AOperationIndigoCharacter;
+class ATile;
 
 UCLASS()
 class OPERATIONINDIGO_API APlayerAIController : public AAIController
@@ -48,7 +49,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Select")
 	void EndOfTurn();
 
-	void SetDestination(FVector MoveLocation);
+	void SetDestination(TArray<ATile*> MovePath);
 
 	void SetTargetToAttack(AOperationIndigoCharacter* TargetToAttack);
 

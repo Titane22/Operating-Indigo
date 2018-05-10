@@ -2,6 +2,7 @@
 
 #include "PlayerAIController.h"
 #include "OperationIndigoCharacter.h"
+#include "Tile.h"
 
 void APlayerAIController::Tick(float DeltaSeconds)
 {
@@ -119,10 +120,14 @@ void APlayerAIController::EndOfTurn()
 	ControlledCharacter->InitTurn();
 }
 
-void APlayerAIController::SetDestination(FVector MoveLocation)
+void APlayerAIController::SetDestination(TArray<ATile*> MovePath)
 {
 	float Speed = ControlledCharacter->GetSpeed();
-	Location = FMath::VInterpTo(ControlledCharacter->GetActorLocation(), MoveLocation, GetWorld()->GetTimeSeconds(), Speed);
+	for (auto Tile : MovePath)
+	{
+		auto MoveLocation = Tile->GetActorLocation();
+		Location = FMath::VInterpTo(ControlledCharacter->GetActorLocation(), MoveLocation, GetWorld()->GetTimeSeconds(), Speed);
+	}
 	bSetLocation = true;
 }
 
