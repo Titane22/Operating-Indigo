@@ -114,7 +114,7 @@ public:
 	void StartGauge();
 
 	// Control Character's State about Movement
-	UFUNCTION(BlueprintImplementableEvent,Category="Movement")
+	//UFUNCTION(BlueprintImplementableEvent,Category="Movement")
 	void MoveAction();
 
 	// Control Character's State about Attack

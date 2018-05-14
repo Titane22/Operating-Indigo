@@ -81,9 +81,7 @@ void APlayerAIController::MoveToTile()
 {
 	if (bSetLocation)
 	{
-		//ControlledCharacter->SetActorLocation(Location);
-		ControlledCharacter->SetTargetLocation(Location);
-		//MoveToLocation(Location, 0.f);
+		MoveToLocation(Location, 0.f);
 		// TODO : True if the distance between the Character and Destination is the same
 		bMoved = true;
 		bSetLocation = false;
@@ -120,12 +118,15 @@ void APlayerAIController::EndOfTurn()
 	ControlledCharacter->InitTurn();
 }
 
-void APlayerAIController::SetDestination(TArray<ATile*> MovePath)
+void APlayerAIController::SetDestination(TArray<ATile*> Waypoints)
 {
 	float Speed = ControlledCharacter->GetSpeed();
-	for (auto Tile : MovePath)
+	auto TileItr = Waypoints.CreateIterator();
+	if(TileItr) UE_LOG(LogTemp,Warning,TEXT("Called"))
+	for (auto Tile : Waypoints)
 	{
 		auto MoveLocation = Tile->GetActorLocation();
+		UE_LOG(LogTemp, Warning, TEXT("Move Path's Tile : %s"), *Tile->GetName())
 		Location = FMath::VInterpTo(ControlledCharacter->GetActorLocation(), MoveLocation, GetWorld()->GetTimeSeconds(), Speed);
 	}
 	bSetLocation = true;

@@ -122,12 +122,15 @@ void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
 	{
 		if (TracingTile)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("TraceActor : %d"), (int32)TraceActor->GetTileState())
+				UE_LOG(LogTemp, Warning, TEXT("TracingActor : %d"), (int32)TraingActor->GetTileState())
 			if (TracingTile != TraceActor)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("TraceActor : %d"),(int32)TraceActor->GetTileState())
 				if (SelectedCharacter && SelectedCharacter->isActivated() && (TraceActor->GetTileState() == ETileState::Movable || TraceActor->GetTileState() == ETileState::Path))
 				{
-					auto Controller = SelectedCharacter->GetController();
+					APlayerAIController* Controller = Cast<APlayerAIController>(SelectedCharacter->GetController());
+					
 					if (Controller)
 					{
 						//UE_LOG(LogTemp,Warning,TEXT("Trace Actor : %s"),*TraceActor->GetName())
@@ -177,7 +180,7 @@ void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
 						break;
 					case ETileState::Movable:
 						TracingTile = TraceActor;
-						TracingTile->SetTracingMovable();
+						TracingTile->SetMovable();
 						break;
 					case ETileState::Attackable:
 						TracingTile = TraceActor;
@@ -210,6 +213,10 @@ void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
 					TracingTile = TraceActor;
 					TracingTile->SetTracing();
 				}
+				else if (TracingTile->GetTileState() == ETileState::Path)
+				{
+					UE_LOG(LogTemp,Warning,TEXT("Called"))
+				}
 			}
 			// A : Tracing Tile -> B : Trace Actor (Movable)
 			else if (TraceActor->GetTileState() == ETileState::Movable)
@@ -218,25 +225,26 @@ void AOperationIndigoPlayerController::EstimateTileState(ATile * TraceActor)
 				{
 					TracingTile->SetNoneOfState();
 					TracingTile = TraceActor;
-					TracingTile->SetTracingMovable();
+					TracingTile->SetMovable();
 				}
 				else if (TracingTile->GetTileState() == ETileState::TracingMovable)
 				{
 					TracingTile->SetMovable();
 					TracingTile = TraceActor;
-					TracingTile->SetTracingMovable();
+					TracingTile->SetMovable();
 				}
 				else if (TracingTile->GetTileState() == ETileState::TracingAttackable)
 				{
 					TracingTile->SetAttackable();
 					TracingTile = TraceActor;
-					TracingTile->SetTracingMovable();
+					TracingTile->SetMovable();
 				}
 				else if (TracingTile->GetTileState() == ETileState::Path)
 				{
+					UE_LOG(LogTemp,Warning,TEXT("Called"))
 					TracingTile->SetMovable();
 					TracingTile = TraceActor;
-					TracingTile->SetTracingMovable();
+					TracingTile->SetMovable();
 				}
 			}
 			// A : Tracing Tile -> B : Trace Actor (Attackable)
@@ -537,49 +545,55 @@ void AOperationIndigoPlayerController::RightMouseButton()
 					//auto MoveLocation = DestinationTile->GetActorLocation();
 					if (PlayerController && PathTile.Num()>0)
 					{
+						// Store the tile where the direction changes to Waypoints
 						auto StartPointTile = SelectedCharacter->GetStartPointTile();
-						TArray<ATile*> MovePath;
+						TArray<ATile*> Waypoints;
 						if (StartPointTile)
 						{
+							// To remember previous tile
 							ATile* CurrentTile = StartPointTile;
 							FVector StartDirection = SelectedCharacter->GetActorForwardVector();
-							UE_LOG(LogTemp, Warning, TEXT("Start Direction : %lf , %lf , %lf"), StartDirection.X, StartDirection.Y, StartDirection.Z);
 							for (auto Tile : PathTile)
 							{
+								// if Tile is StartPointTile, Continue;
 								if (Tile != StartPointTile)
 								{
+									/** Unit-Length Vector (= Normalized Vectors)
+									*	Vector = MoveLocation - StartLocation
+									*	Vector.Normalized = Vector / (Vector's Size)
+									*	Vector.Normalized -> Direction
+									**/
 									auto StartLocation = CurrentTile->GetActorLocation();
 									auto MoveLocation = Tile->GetActorLocation();
 									auto RelativeLocation = MoveLocation - StartLocation;
 									auto VectorLength = FMath::Sqrt(FVector::DotProduct(RelativeLocation, RelativeLocation));
 									auto Direction = RelativeLocation / VectorLength;
-									/*UE_LOG(LogTemp, Warning, TEXT("Start Location : %lf ,  %lf,  %lf"), StartLocation.X, StartLocation.Y, StartLocation.Z);
-									UE_LOG(LogTemp, Warning, TEXT("Move Location : %lf ,  %lf,  %lf"), MoveLocation.X, MoveLocation.Y, MoveLocation.Z);
-									UE_LOG(LogTemp, Warning, TEXT("Relative Location : %lf ,  %lf,  %lf"), RelativeLocation.X, RelativeLocation.Y, RelativeLocation.Z);
-									UE_LOG(LogTemp, Warning, TEXT("Vector Length : %lf"), VectorLength);
-									UE_LOG(LogTemp, Warning, TEXT("Direction : %lf ,  %lf,  %lf"), Direction.X, Direction.Y, Direction.Z);*/
 									
 									if (StartDirection != Direction)
 									{
 										StartDirection = Direction;
-										MovePath.Add(CurrentTile);
 										UE_LOG(LogTemp,Warning,TEXT("Current Tile : %s"),*CurrentTile->GetName())
+										Waypoints.Add(CurrentTile);
 									}
 									else if (Tile == DestinationTile)
 									{
-										MovePath.Add(Tile);
+										Waypoints.Add(Tile);
 									}
 									CurrentTile = Tile;
 								}
 							}
-							if (MovePath.Num() > 0)
+							if (Waypoints.Num() > 0)
 							{
-								PlayerController->SetDestination(MovePath);
+								for (auto Tile : PathTile)
+								{
+									Tile->SetNoneOfState();
+								}
+								PathTile.Empty();
+								PlayerController->SetDestination(Waypoints);
 							}
 							// SelectedCharacter->Pathfinding(DestinationTile);
 							SelectedCharacter->ResetCollisionSphere();
 						}
-						
 					}
 				}
 

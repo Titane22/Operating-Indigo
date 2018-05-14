@@ -308,13 +308,13 @@ void AOperationIndigoCharacter::StartGauge()
 	bStopGauge = false;
 }
 
-//void AOperationIndigoCharacter::MoveAction()
-//{
-//	if (bCanMove)
-//	{
-//		bCanMove = false;
-//	}
-//}
+void AOperationIndigoCharacter::MoveAction()
+{
+	if (bCanMove)
+	{
+		bCanMove = false;
+	}
+}
 
 void AOperationIndigoCharacter::AttackAction()
 {
